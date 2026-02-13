@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GHOST_CHAT | Full Immersion</title>
+    <style>
+        :root {
+            --paper: #f4e4bc;
+            --ink: #2b2b2b;
+            --gold: #d4af37;
+        }
+        body { 
+            margin: 0; padding: 0; overflow: hidden; 
+            background-color: var(--paper);
+            font-family: 'Courier New', monospace;
+            display: flex; align-items: center; justify-content: center;
+            height: 100vh;
+            touch-action: manipulation;
+        }
+
+        #game-wrapper {
+            position: relative;
+            width: 400px;
+            height: 600px;
+            border: 3px solid var(--ink);
+            border-radius: 45px; /* Squircle */
+            overflow: hidden;
+            box-shadow: 12px 12px 0px var(--ink);
+            background: var(--paper);
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .hacker-zoom-active { 
+            transform: scale(1.15); 
+            filter: contrast(1.1);
+        }
+
+        canvas { display: block; }
+
+        .ui-panel {
+            position: absolute;
+            top: 30px; width: 100%;
+            display: flex; flex-direction: column; align-items: center;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .score-box {
+            background: rgba(244, 228, 188, 0.95);
+            padding: 10px 30px;
+            border: 2px solid var(--ink);
+            border-radius: 20px; /* Squircle */
+            font-weight: bold;
+            color: var(--ink);
+            box-shadow: 4px 4px 0px var(--ink);
+        }
+
+        #overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(244, 228, 188, 0.8);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 20;
+            cursor: pointer;
+        }
+
+        .btn-start {
+            background: var(--ink);
+            color: var(--paper);
+            padding: 15px 40px;
+            border-radius: 20px; /* Squircle */
+            font-weight: bold;
+            font-size: 1.5em;
+            border: none;
+            cursor: pointer;
+        }
+
+        .tagline { font-size: 10px; margin-top: 15px; color: var(--ink); font-weight: bold; text-align: center; }
+        .high-score-text { font-size: 14px; margin-bottom: 15px; color: var(--ink); font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div id="game-wrapper">
+        <div id="overlay" onclick="startGame()">
+            <div id="highScoreDisplay" class="high-score-text">BEST: 0</div>
+            <div class="btn-start">TAP TO START</div>
+            <div class="tagline">GHOST_CHAT<br>No Phone. No Email. No Data.</div>
+        </div>
+
+        <div class="ui-panel">
+            <div class="score-box">FLAPPY GHOST: <span id="scoreVal">0</span></div>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const wrapper = document.getElementById('game-wrapper');
+        const scoreEl = document.getElementById('scoreVal');
+        const overlay = document.getElementById('overlay');
+        const highScoreDisplay = document.getElementById('highScoreDisplay');
+
+        canvas.width = 400;
+        canvas.height = 600;
+
+        // --- IMPROVED AUDIO SYSTEM ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let bgOscillator = null;
+        let bgGain = null;
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'flap') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+            } else if (type === 'score') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.2);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+            } else if (type === 'death') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(40, audioCtx.currentTime + 0.4);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.4);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+            }
+        }
+
+        function startBackgroundMusic() {
+            if (bgOscillator) return; // Prevent double music
+            
+            bgGain = audioCtx.createGain();
+            bgGain.gain.setValueAtTime(0, audioCtx.currentTime);
+            bgGain.gain.linearRampToValueAtTime(0.03, audioCtx.currentTime + 2); // Fade in
+            bgGain.connect(audioCtx.destination);
+
+            // Layer 1: Low Drone
+            bgOscillator = audioCtx.createOscillator();
+            bgOscillator.type = 'sine';
+            bgOscillator.frequency.setValueAtTime(55, audioCtx.currentTime); // Low A note
+            bgOscillator.connect(bgGain);
+            bgOscillator.start();
+
+            // Layer 2: Pulsing Wah-wah effect
+            const lfo = audioCtx.createOscillator();
+            const lfoGain = audioCtx.createGain();
+            lfo.frequency.value = 0.5; // slow pulse
+            lfoGain.gain.value = 5; 
+            lfo.connect(lfoGain);
+            lfoGain.connect(bgOscillator.frequency);
+            lfo.start();
+        }
+
+        let ghost, pipes, frame, score, hackerMode, gameRunning, gameSpeed, spawnTimer;
+
+        function initGameState() {
+            ghost = { 
+                x: 80, y: 300, w: 45, h: 55, 
+                velocity: 0, gravity: 0.25, jump: -5.5,
+                isDead: false,
+                trail: [],
+                particles: []
+            };
+            pipes = [];
+            frame = 0;
+            score = 0;
+            hackerMode = false;
+            gameRunning = false;
+            gameSpeed = 3.5;
+            spawnTimer = 0;
+            scoreEl.innerText = "0";
+            
+            let storedHigh = localStorage.getItem('ghostChatHighScore') || 0;
+            highScoreDisplay.innerText = `BEST: ${storedHigh}`;
+            overlay.style.display = 'flex';
+        }
+
+        function requestFullScreen() {
+            const doc = document.documentElement;
+            if (doc.requestFullscreen) doc.requestFullscreen();
+            else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
+        }
+
+        function startGame() {
+            if (gameRunning) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            startBackgroundMusic(); // Start the drone
+            requestFullScreen();
+            overlay.style.display = 'none';
+            gameRunning = true;
+        }
+
+        const flap = (e) => { 
+            if(!gameRunning && !ghost.isDead) { startGame(); return; }
+            if(!ghost.isDead) {
+                ghost.velocity = ghost.jump;
+                playSound('flap');
+            }
+            if(e) e.preventDefault();
+        };
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') flap();
+            if (e.key === 'Shift') toggleHackerMode(true);
+        });
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'Shift') toggleHackerMode(false);
+        });
+
+        canvas.addEventListener('touchstart', flap, {passive: false});
+        canvas.addEventListener('mousedown', flap);
+
+        function toggleHackerMode(active) {
+            if(!gameRunning || ghost.isDead) return;
+            hackerMode = active;
+            if (active) wrapper.classList.add('hacker-zoom-active');
+            else wrapper.classList.remove('hacker-zoom-active');
+        }
+
+        function renderGhostModel(x, y, isTrail) {
+            ctx.save();
+            ctx.translate(x + ghost.w/2, y + ghost.h/2);
+            if(!isTrail) ctx.rotate(Math.min(0.4, Math.max(-0.4, ghost.velocity * 0.1)));
+
+            ctx.strokeStyle = "#2b2b2b";
+            ctx.lineWidth = 3;
+            ctx.fillStyle = isTrail ? "rgba(43,43,43,0.1)" : "#fffcf2";
+
+            if(hackerMode && !isTrail) {
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = "#d4af37";
+            }
+
+            ctx.beginPath();
+            ctx.moveTo(-20, -10);
+            ctx.bezierCurveTo(-20, -35, 20, -35, 20, -10);
+            ctx.lineTo(20, 20);
+            ctx.quadraticCurveTo(10, 30, 0, 20);
+            ctx.quadraticCurveTo(-10, 30, -20, 20);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            if(!isTrail) {
+                ctx.fillStyle = "#2b2b2b";
+                ctx.beginPath();
+                ctx.ellipse(-7, -8, 3.5, 6, 0, 0, Math.PI * 2);
+                ctx.ellipse(7, -8, 3.5, 6, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath(); ctx.arc(0, 2, 4, 0.2, Math.PI - 0.2); ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        function triggerDeath() {
+            if (ghost.isDead) return;
+            ghost.isDead = true;
+            playSound('death');
+            
+            const finalScore = Math.floor(score);
+            let currentHigh = localStorage.getItem('ghostChatHighScore') || 0;
+            if (finalScore > currentHigh) {
+                localStorage.setItem('ghostChatHighScore', finalScore);
+            }
+
+            for(let i=0; i<20; i++) {
+                ghost.particles.push({
+                    x: ghost.x + 20, y: ghost.y + 20,
+                    vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10,
+                    a: 1, s: Math.random()*4
+                });
+            }
+            
+            setTimeout(() => initGameState(), 1500);
+        }
+
+        function update() {
+            if (!gameRunning || ghost.isDead) return;
+
+            ghost.velocity += ghost.gravity;
+            ghost.y += ghost.velocity;
+
+            let level = Math.floor(score / 5);
+            let dynamicSpeed = gameSpeed + (level * 0.25);
+            let currentSpawnGap = Math.max(65, 110 - (level * 6));
+
+            spawnTimer--;
+            if (spawnTimer <= 0) {
+                let gap = 165;
+                let h = Math.random() * (canvas.height - gap - 150) + 75;
+                pipes.push({ x: canvas.width, y: 0, w: 60, h: h, passed: false });
+                pipes.push({ x: canvas.width, y: h + gap, w: 60, h: canvas.height - h - gap, passed: false });
+                spawnTimer = currentSpawnGap;
+            }
+
+            pipes.forEach(p => {
+                let moveStep = hackerMode ? dynamicSpeed * 1.5 : dynamicSpeed;
+                p.x -= moveStep;
+
+                if (ghost.x + 10 < p.x + p.w && ghost.x + ghost.w - 10 > p.x &&
+                    ghost.y + 10 < p.y + p.h && ghost.y + ghost.h - 10 > p.y) triggerDeath();
+                
+                if (!p.passed && p.x < ghost.x) { 
+                    score += 0.5; 
+                    p.passed = true; 
+                    if (Number.isInteger(score)) {
+                        scoreEl.innerText = score;
+                        playSound('score');
+                    }
+                }
+            });
+
+            pipes = pipes.filter(p => p.x + p.w > -50);
+            if (ghost.y > canvas.height || ghost.y < -50) triggerDeath();
+            frame++;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            pipes.forEach(p => {
+                ctx.fillStyle = "rgba(43, 43, 43, 0.05)";
+                ctx.fillRect(p.x, p.y, p.w, p.h);
+                ctx.strokeStyle = "#2b2b2b";
+                ctx.lineWidth = 2.5;
+                ctx.strokeRect(p.x, p.y, p.w, p.h);
+            });
+
+            if (ghost.isDead) {
+                ghost.particles.forEach(p => {
+                    ctx.fillStyle = `rgba(43, 43, 43, ${p.a})`;
+                    ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2); ctx.fill();
+                    p.x += p.vx; p.y += p.vy; p.a -= 0.02;
+                });
+            } else {
+                if (frame % 4 === 0) ghost.trail.push({x: ghost.x, y: ghost.y, a: 0.3});
+                ghost.trail.forEach((t, i) => {
+                    ctx.globalAlpha = t.a;
+                    renderGhostModel(t.x, t.y, true);
+                    t.a -= 0.04;
+                    if(t.a <= 0) ghost.trail.splice(i, 1);
+                });
+                ctx.globalAlpha = 1;
+                renderGhostModel(ghost.x, ghost.y, false);
+            }
+        }
+
+        function loop() { update(); draw(); requestAnimationFrame(loop); }
+        
+        initGameState();
+        loop();
+    </script>
+</body>
+</html>
