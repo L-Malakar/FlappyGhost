@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Flappy Ghost | By L.Malakar</title>
-    <link rel="manifest" href="data:application/manifest+json;base64,ewogICJiaW5kaW5nIjogImdub21lIiwKICAibmFtZSI6ICJHSE9TVF9DSEFUIiwKICAic2hvcnRfbmFtZSI6ICJHSE9TVCIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJmdWxsc2NyZWVuIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMmIyYjJiIiwKICAidGhlbWVfY29sb3I6ICIjZDRhZjM3IiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly92aWEucGxhY2Vob2xkZXIuY29tLzUxMi9kNGFmMzcvMmIyYjJiP3RleHQ9RyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgICJ0eXBlIjogImltYWdlL3BuZyIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSIKICAgIH0KICBdCn0=">
+    <link rel="manifest" href="data:application/manifest+json;base64,ewogICJiaW5kaW5nIjogImdub21lIiwKICAibmFtZSI6ICJHSE9TVF9DSEFUIiwKICAic2hvcnRfbmFtZSI6ICJHSE9TVCIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJmdWxsc2NyZWVuIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMmIyYjJiIiwKICAidGhlbWVfY29sb3IiOiAiI2Q0YWYzNyIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vdmlhLnBsYWNlaG9sZGVyLmNvbS81MTIvZDRhZjM3LzJiMmIyYj90ZXh0PUciLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICAidHlwZSI6ICJpbWFnZS9wbmciLAogICAgICAicHVycG9zZSI6ICJhbnkgbWFza2FibGUiCiAgICB9CiAgXQp9">
     <style>
         :root {
             --paper: #f4e4bc;
@@ -12,12 +12,15 @@
             --gold: #d4af37;
             --squircle: 25px 8px 25px 8px; 
         }
+
         body { 
             margin: 0; padding: 0; overflow: hidden; 
             background-color: var(--ink);
             font-family: 'Courier New', monospace;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
+            /* Use dvh for true mobile viewport height */
             height: 100vh;
+            height: 100dvh;
             touch-action: manipulation;
         }
 
@@ -26,14 +29,36 @@
             width: 400px;
             height: 600px;
             border: 4px solid var(--gold);
-            border-radius: 60px;
+            border-radius: 40px; /* Squircle-ish */
             overflow: hidden;
             box-shadow: 0px 0px 50px rgba(0,0,0,0.5);
             background: var(--paper);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        canvas { display: block; }
+        /* Hacker Mode Zoom Animation */
+        .hacker-zoom-active {
+            transform: scale(1.1);
+            border-color: #00ff00 !important; /* Matrix green or keep your gold */
+        }
+
+        /* Mobile Fix: Scale the game to fit small screens */
+        @media (max-width: 420px) {
+            #game-wrapper {
+                width: 100vw;
+                height: 100vh;
+                height: 100dvh;
+                border: none;
+                border-radius: 0;
+            }
+        }
+
+        canvas { display: block; width: 100%; height: 100%; }
+
+        /* UI elements with Squircle-ish shapes */
+        .btn-start, .btn-home-box, .btn-share-refined, .modal, .score-box {
+            border-radius: var(--squircle);
+        }
 
         .symbol-home {
             width: 20px; height: 14px;
@@ -83,10 +108,6 @@
             z-index: 2;
         }
 
-        .btn-share-refined:hover .symbol-mini-ghost {
-            transform: translateY(-4px) rotate(-5deg);
-        }
-
         .ui-panel {
             position: absolute;
             top: 40px; width: 100%;
@@ -99,7 +120,6 @@
             background: var(--paper);
             padding: 12px 25px;
             border: 3px solid var(--ink);
-            border-radius: 20px 5px 20px 5px;
             font-weight: bold;
             color: var(--ink);
             box-shadow: 5px 5px 0px var(--ink);
@@ -135,7 +155,6 @@
             background: var(--ink);
             color: var(--paper);
             padding: 20px 40px;
-            border-radius: var(--squircle);
             font-weight: bold; font-size: 1.2em;
             border: none;
             box-shadow: 0px 4px 15px rgba(0,0,0,0.2);
@@ -145,7 +164,6 @@
         .btn-home-box {
             background: var(--paper);
             padding: 18px 25px;
-            border-radius: var(--squircle);
             border: 3px solid var(--ink);
             cursor: pointer; display: flex;
             align-items: center; justify-content: center;
@@ -162,7 +180,7 @@
 
         .btn-share-refined {
             background: transparent; color: var(--ink);
-            padding: 12px 20px; border-radius: var(--squircle);
+            padding: 12px 20px;
             font-weight: bold; font-size: 0.9em;
             border: 2px solid var(--ink); margin-top: 15px;
             cursor: pointer; display: flex;
@@ -181,7 +199,6 @@
             pointer-events: auto;
         }
 
-        /* NEW START SCREEN INSTALL BUTTON */
         .btn-install-main {
             background: var(--paper);
             color: var(--ink);
@@ -191,7 +208,7 @@
             border: 2px solid var(--ink);
             margin-top: 10px;
             cursor: pointer;
-            display: none; /* Only shows when the browser is ready */
+            display: none;
             box-shadow: 3px 3px 0px var(--ink);
             transition: 0.2s;
         }
@@ -203,7 +220,7 @@
             transform: translate(-50%, -50%);
             width: 85%; background: rgba(244, 228, 188, 0.8);
             backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-            border: 4px solid var(--ink); border-radius: 35px 10px;
+            border: 4px solid var(--ink);
             padding: 20px; z-index: 30;
             display: none; flex-direction: column; align-items: center;
             box-shadow: 10px 10px 0px var(--ink);
@@ -216,10 +233,6 @@
             align-items: center; justify-content: center;
             border: 2px dashed var(--ink);
         }
-
-        .modal-title { font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid var(--ink); }
-        .setting-row { display: flex; justify-content: space-between; width: 100%; margin: 10px 0; align-items: center; }
-        input[type="color"] { border: 2px solid var(--ink); background: none; cursor: pointer; height: 35px; width: 60px; border-radius: 5px; }
 
         .tagline { font-size: 22px; color: var(--ink); letter-spacing: 1px; font-weight: bold; margin-top: 40px; }
         .sub-tagline { font-size: 11px; margin-top: 5px; font-weight: bold; color: var(--ink); }
@@ -264,7 +277,7 @@
         <div id="overlay">
             <div style="display: flex; flex-direction: column; align-items: center;">
                 <div id="highScoreDisplay" class="high-score-text">BEST: 0</div>
-                <div class="tagline">Flappy Ghost </div>
+                <div class="tagline">FLAPPY GHOST</div>
                 <div class="sub-tagline">V- 0.5.0</div>
                 
                 <button id="pwaInstallBtn" class="btn-install-main" onclick="handleInstallClick()">
@@ -280,7 +293,7 @@
 
         <div id="death-screen">
             <div class="death-card">
-                <div class="modal-title" style="color: var(--ink); border-color: var(--ink);">GHOST DESTROYED</div>
+                <div class="modal-title" style="color: var(--ink); border-color: var(--ink); font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid var(--ink);">GHOST DESTROYED</div>
                 <div style="font-size: 24px; margin: 15px 0;">SCORE: <span id="finalScore">0</span></div>
                 <div style="font-size: 14px; color: var(--gold); font-weight: bold;">BEST: <span id="bestScore">0</span></div>
                 <button class="btn-share-refined" onclick="shareScore()">
@@ -288,7 +301,7 @@
                         <div id="miniGhostBody" class="mini-ghost-body"></div>
                         <div id="miniGhostEyes" class="mini-ghost-eyes"></div>
                     </div> 
-                    <span>Share your SCORE!</span>
+                    <span>Share SCORE!</span>
                 </button>
             </div>
             <div class="death-actions">
@@ -300,20 +313,20 @@
         </div>
 
         <div id="custom-modal" class="modal">
-            <div class="modal-title">EDIT GHOST</div>
+            <div class="modal-title" style="font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid var(--ink);">EDIT GHOST</div>
             <div class="preview-box"><canvas id="previewCanvas" width="80" height="80"></canvas></div>
-            <div class="setting-row"><label>Body Color:</label><input type="color" id="bodyColorPicker" value="#fffcf2" oninput="updatePreview()"></div>
-            <div class="setting-row"><label>Eye Color:</label><input type="color" id="eyeColorPicker" value="#2b2b2b" oninput="updatePreview()"></div>
-            <button class="btn-customize" style="width: 100%; border-radius: var(--squircle);" onclick="toggleModal(false)">Apply Changes</button>
+            <div style="display: flex; justify-content: space-between; width: 100%; margin: 10px 0; align-items: center;"><label>Body:</label><input type="color" id="bodyColorPicker" value="#fffcf2" oninput="updatePreview()"></div>
+            <div style="display: flex; justify-content: space-between; width: 100%; margin: 10px 0; align-items: center;"><label>Eyes:</label><input type="color" id="eyeColorPicker" value="#2b2b2b" oninput="updatePreview()"></div>
+            <button class="btn-customize" style="width: 100%; border-radius: var(--squircle);" onclick="toggleModal(false)">Apply</button>
         </div>
 
         <div id="settings-modal" class="modal">
-            <div class="modal-title">SETTINGS MENU</div>
-            <div class="setting-row">
-                <label>Mute Sound:</label>
+            <div class="modal-title" style="font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid var(--ink);">SETTINGS</div>
+            <div style="display: flex; justify-content: space-between; width: 100%; margin: 10px 0; align-items: center;">
+                <label>Mute Game:</label>
                 <div id="muteToggle" class="toggle-switch" onclick="toggleMute()"><div class="toggle-knob"></div></div>
             </div>
-            <div class="setting-row">
+            <div style="display: flex; justify-content: space-between; width: 100%; margin: 10px 0; align-items: center;">
                 <label>Mute Click:</label>
                 <div id="clickMuteToggle" class="toggle-switch" onclick="toggleClickMute()"><div class="toggle-knob"></div></div>
             </div>
@@ -327,7 +340,7 @@
         <div id="toast">Score Copied!</div>
     </div>
 
-    <div class="footer-credits">Flappy Ghost | developed by L.Malakar.</div>
+    <div class="footer-credits">Flappy Ghost | By L.Malakar</div>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
@@ -349,8 +362,13 @@
         const miniGhostEyes = document.getElementById('miniGhostEyes');
         const pwaInstallBtn = document.getElementById('pwaInstallBtn');
 
-        canvas.width = 400;
-        canvas.height = 600;
+        // Initial canvas setup
+        function resizeCanvas() {
+            canvas.width = wrapper.clientWidth;
+            canvas.height = wrapper.clientHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
 
         let ghostBodyColor = localStorage.getItem('ghostBody') || "#fffcf2";
         let ghostEyeColor = localStorage.getItem('ghostEye') || "#2b2b2b";
@@ -483,7 +501,7 @@
             const finalScore = Math.floor(score);
             const bestScore = localStorage.getItem('ghostChatHighScore') || finalScore;
             const currentUrl = window.location.href;
-            const message = `Flappy Ghost | A web game\nI am playing it now\nMy current score is--> ${finalScore}\nMy best score is--> ${bestScore}\n\nAnd you can also play with the link below-\nLink- ${currentUrl}`;
+            const message = `Flappy Ghost | GHOST_CHAT\nMy score: ${finalScore}\nBest: ${bestScore}\n\nPlay here: ${currentUrl}`;
 
             if (navigator.share) {
                 try {
@@ -513,7 +531,7 @@
         let ghost, pipes, frame, score, hackerMode, gameRunning, gameSpeed, spawnTimer;
 
         function initGameState() {
-            ghost = { x: 80, y: 300, w: 45, h: 55, velocity: 0, gravity: 0.25, jump: -5.8, isDead: false, trail: [], particles: [] };
+            ghost = { x: 50, y: 300, w: 45, h: 55, velocity: 0, gravity: 0.25, jump: -5.8, isDead: false, trail: [], particles: [] };
             pipes = []; frame = 0; score = 0; hackerMode = false; gameRunning = false; gameSpeed = 3.2; spawnTimer = 0; isPaused = false;
             scoreEl.innerText = "0";
             let storedHigh = localStorage.getItem('ghostChatHighScore') || 0;
@@ -562,7 +580,7 @@
             ctx.fillStyle = isTrail ? "rgba(43,43,43,0.1)" : ghostBodyColor;
             if(hackerMode && !isTrail) { ctx.shadowBlur = 15; ctx.shadowColor = varColor('--gold'); ctx.strokeStyle = varColor('--gold'); }
             ctx.beginPath(); ctx.moveTo(-20, -10); ctx.bezierCurveTo(-20, -35, 20, -35, 20, -10);
-            ctx.lineTo(20, 20); ctx.quadraticCurveTo(10, 30, 0, 20); ctx.quadraticCurveTo(-10, 30, -20, 20);
+            ctx.lineTo(20, 20); ctx.quadraticCurveTo(10, 30, 0, 20); ctx.quadraticCurveTo(-10, 30, -20, 20); // BUG FIXED: pCtx changed to ctx
             ctx.closePath(); ctx.fill(); ctx.stroke();
             if(!isTrail) {
                 ctx.fillStyle = hackerMode ? varColor('--gold') : ghostEyeColor;
@@ -607,7 +625,7 @@
                 if (ghost.x + 12 < p.x + p.w && ghost.x + ghost.w - 12 > p.x && ghost.y + 12 < p.y + p.h && ghost.y + ghost.h - 12 > p.y) triggerDeath();
                 if (!p.passed && p.x < ghost.x) { score += 0.5; p.passed = true; if (Number.isInteger(score)) { scoreEl.innerText = score; playSound('score'); } }
             });
-            pipes = pipes.filter(p => p.x + p.w > -50);
+            pipes = pipes.filter(p => p.x + p.w > -100);
             if (ghost.y > canvas.height - 20 || ghost.y < -50) triggerDeath();
             frame++;
         }
@@ -632,46 +650,32 @@
         function loop() { update(); draw(); requestAnimationFrame(loop); }
         initGameState(); loop();
 
-        // --- PWA INSTALLATION LOGIC ---
+        // PWA & FULLSCREEN LOGIC
         let deferredPrompt;
-
         window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            pwaInstallBtn.style.display = 'block'; // Show on main start screen
+            e.preventDefault(); deferredPrompt = e;
+            pwaInstallBtn.style.display = 'block';
         });
 
         async function handleInstallClick() {
             if (!deferredPrompt) return;
-            playSound('action_click');
             deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
-            if (outcome === 'accepted') {
-                pwaInstallBtn.style.display = 'none';
-            }
+            if (outcome === 'accepted') pwaInstallBtn.style.display = 'none';
             deferredPrompt = null;
         }
 
-        window.addEventListener('appinstalled', (e) => {
-            showToast("Shortcut Created!");
-            pwaInstallBtn.style.display = 'none';
-        });
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('data:text/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdmZXRjaCcsIGZ1bmN0aW9uKGV2ZW50KSB7fSk7');
-        }
-
-        // --- FULLSCREEN LOGIC ---
         const requestFullscreen = () => {
             const elem = document.documentElement;
             if (elem.requestFullscreen) elem.requestFullscreen();
             else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
             window.removeEventListener('click', requestFullscreen);
-            window.removeEventListener('touchstart', requestFullscreen);
         };
         window.addEventListener('click', requestFullscreen);
-        window.addEventListener('touchstart', requestFullscreen);
 
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:text/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdmZXRjaCcsIGZ1bmN0aW9uKGV2ZW50KSB7fSk7');
+        }
     </script>
 </body>
 </html>
