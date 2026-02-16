@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Flappy Ghost | By L.Malakar</title>
-    <link rel="manifest" href="data:application/manifest+json;base64,ewogICJiaW5kaW5nIjogImdub21lIiwKICAibmFtZSI6ICJHSE9TVF9DSEFUIiwKICAic2hvcnRfbmFtZSI6ICJHSE9TVCIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJmdWxsc2NyZWVuIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMmIyYjJiIiwKICAidGhlbWVfY29sb3IiOiAiI2Q0YWYzNyIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vdmlhLnBsYWNlaG9sZGVyLmNvbS81MTIvZDRhZjM3LzJiMmIyYj90ZXh0PUciLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICAidHlwZSI6ICJpbWFnZS9wbmciLAogICAgICAicHVycG9zZSI6ICJhbnkgbWFza2FibGUiCiAgICB9CiAgXQp9">
+    <link rel="manifest" href="data:application/manifest+json;base64,ewogICJiaW5kaW5nIjogImdub21lIiwKICAibmFtZSI6ICJGTEFQUFlfR0hPU1QiLAogICJzaG9ydF9uYW1lIjogIkdIT1NUIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogImZ1bGxzY3JlZW4iLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMyYjJiMmIiLAogICJ0aGVtZV9jb2xvciI6ICIjZDRhZjM3IiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly92aWEucGxhY2Vob2xkZXIuY29tLzUxMi9kNWFmMzcvMmIyYjJiP3RleHQ9RyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgICJ0eXBlIjogImltYWdlL3BuZyIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSIKICAgIH0KICBdCn0=">
     <style>
         :root {
             --paper: #f4e4bc;
@@ -241,8 +241,8 @@
             overflow: hidden;
         }
 
-        .tagline { font-size: 22px; color: var(--ink); letter-spacing: 1px; font-weight: bold; margin-top: 40px; }
-        .sub-tagline { font-size: 11px; margin-top: 5px; font-weight: bold; color: var(--ink); }
+        .tagline { font-size: 24px; color: var(--ink); letter-spacing: 2px; font-weight: bold; margin-top: 40px; }
+        .sub-tagline { font-size: 14px; margin-top: 5px; font-weight: bold; color: var(--gold); letter-spacing: 1px; }
         .high-score-text { font-size: 18px; color: var(--gold); text-shadow: 1px 1px 0px var(--ink); font-weight: bold; }
 
         .footer-credits { color: var(--paper); font-size: 12px; margin-top: 30px; opacity: 0.6; letter-spacing: 1px; }
@@ -317,8 +317,8 @@
         <div id="overlay">
             <div style="display: flex; flex-direction: column; align-items: center;">
                 <div id="highScoreDisplay" class="high-score-text">BEST: 0</div>
-                <div class="tagline">GHOST_CHAT</div>
-                <div class="sub-tagline">No Phone. No Email. No Data.</div>
+                <div class="tagline">FLAPPY GHOST</div>
+                <div class="sub-tagline">V- 1.6</div>
                 
                 <button id="pwaInstallBtn" class="btn-install-main" onclick="handleInstallClick()">
                     INSTALL GAME
@@ -688,9 +688,9 @@
         async function shareScore() {
             playSound('action_click');
             const finalScore = Math.floor(score);
-            const message = `Flappy Ghost | GHOST_CHAT\nMy score: ${finalScore}\n\nPlay here: ${window.location.href}`;
+            const message = `FLAPPY GHOST | V- 1.6\nMy score: ${finalScore}\n\nPlay here: ${window.location.href}`;
             if (navigator.share) {
-                try { await navigator.share({ title: 'GHOST_CHAT', text: message }); return; } catch (err) {}
+                try { await navigator.share({ title: 'FLAPPY GHOST', text: message }); return; } catch (err) {}
             }
             copyToClipboard(message);
         }
