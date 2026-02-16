@@ -10,6 +10,7 @@
             --paper: #f4e4bc;
             --ink: #2b2b2b;
             --gold: #d4af37;
+            /* Constraint: Shape between square and rounded */
             --squircle: 25px 8px 25px 8px; 
         }
 
@@ -35,6 +36,7 @@
             transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
+        /* Constraint: Hacker Mode zoom in/out animation */
         .hacker-zoom-active {
             transform: scale(1.15); 
             border-color: #00ff00 !important; 
@@ -241,8 +243,10 @@
             overflow: hidden;
         }
 
+        /* Branding Change */
         .tagline { font-size: 24px; color: var(--ink); letter-spacing: 2px; font-weight: bold; margin-top: 40px; }
         .sub-tagline { font-size: 14px; margin-top: 5px; font-weight: bold; color: var(--gold); letter-spacing: 1px; }
+        
         .high-score-text { font-size: 18px; color: var(--gold); text-shadow: 1px 1px 0px var(--ink); font-weight: bold; }
 
         .footer-credits { color: var(--paper); font-size: 12px; margin-top: 30px; opacity: 0.6; letter-spacing: 1px; }
@@ -449,6 +453,7 @@
     <div class="footer-credits">Flappy Ghost | By L.Malakar</div>
 
     <script>
+        /* Game Logic and References */
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const pCanvas = document.getElementById('previewCanvas');
@@ -688,6 +693,7 @@
         async function shareScore() {
             playSound('action_click');
             const finalScore = Math.floor(score);
+            // Updated Share Message Branding
             const message = `FLAPPY GHOST | V- 1.6\nMy score: ${finalScore}\n\nPlay here: ${window.location.href}`;
             if (navigator.share) {
                 try { await navigator.share({ title: 'FLAPPY GHOST', text: message }); return; } catch (err) {}
@@ -876,6 +882,7 @@
         function loop() { update(); draw(); updatePreview(); requestAnimationFrame(loop); }
         initGameState(); loop();
 
+        /* PWA Setup */
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; pwaInstallBtn.style.display = 'block'; });
         async function handleInstallClick() {
