@@ -36,7 +36,7 @@
         }
 
         .hacker-zoom-active {
-            transform: scale(1.1);
+            transform: scale(1.15); 
             border-color: #00ff00 !important; 
         }
 
@@ -52,7 +52,7 @@
 
         canvas { display: block; width: 100%; height: 100%; }
 
-        .btn-start, .btn-home-box, .btn-share-refined, .modal, .score-box {
+        .btn-start, .btn-home-box, .btn-share-refined, .modal, .score-box, .btn-install-settings, .opt-btn {
             border-radius: var(--squircle);
         }
 
@@ -81,27 +81,16 @@
             top: 0; left: 0; width: 100%; height: 100%;
             background: var(--paper);
             border: 2px solid var(--ink);
-            border-radius: 12px 12px 0 0;
             box-sizing: border-box;
-        }
-        
-        .mini-ghost-body::after {
-            content: '';
-            position: absolute;
-            bottom: -5px; left: -2px;
-            width: calc(100% + 4px); height: 8px;
-            background: var(--paper);
-            clip-path: polygon(0% 0%, 100% 0%, 100% 70%, 75% 100%, 50% 70%, 25% 100%, 0% 70%);
+            transition: all 0.2s;
         }
 
         .mini-ghost-eyes {
             position: absolute;
-            top: 7px; left: 4px;
-            width: 3px; height: 5px;
-            background: var(--ink);
-            border-radius: 50%;
-            box-shadow: 10px 0 0 var(--ink);
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             z-index: 2;
+            pointer-events: none;
         }
 
         .ui-panel {
@@ -155,6 +144,7 @@
             border: none;
             box-shadow: 0px 4px 15px rgba(0,0,0,0.2);
             transition: 0.2s; cursor: pointer;
+            border-radius: var(--squircle);
         }
 
         .btn-home-box {
@@ -195,6 +185,20 @@
             pointer-events: auto;
         }
 
+        .btn-install-settings {
+            background: var(--ink);
+            color: var(--paper);
+            padding: 12px 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+            border: none;
+            margin-top: 15px;
+            cursor: pointer;
+            width: 100%;
+            display: block; 
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+        }
+
         .btn-install-main {
             background: var(--paper);
             color: var(--ink);
@@ -204,12 +208,12 @@
             border: 2px solid var(--ink);
             margin-top: 10px;
             cursor: pointer;
-            display: none;
+            display: none; 
             box-shadow: 3px 3px 0px var(--ink);
             transition: 0.2s;
         }
 
-        .btn-start:active, .btn-home-box:active, .btn-customize:active, .btn-settings:active, .btn-share-refined:active, .btn-install-main:active { transform: scale(0.95); }
+        .btn-start:active, .btn-home-box:active, .btn-customize:active, .btn-settings:active, .btn-share-refined:active, .btn-install-main:active, .btn-install-settings:active { transform: scale(0.95); }
 
         .modal {
             position: absolute; top: 50%; left: 50%;
@@ -222,12 +226,19 @@
             box-shadow: 10px 10px 0px var(--ink);
         }
 
+        #eye-modal, #mouth-modal, #body-modal {
+            top: auto; bottom: 20px;
+            transform: translate(-50%, 0);
+            width: 90%;
+        }
+
         .preview-box {
-            width: 100px; height: 100px;
+            width: 100px; height: 120px;
             background: rgba(43,43,43,0.05); border-radius: 20px;
             margin-bottom: 15px; display: flex;
             align-items: center; justify-content: center;
             border: 2px dashed var(--ink);
+            overflow: hidden;
         }
 
         .tagline { font-size: 22px; color: var(--ink); letter-spacing: 1px; font-weight: bold; margin-top: 40px; }
@@ -264,6 +275,39 @@
         }
 
         .death-actions { display: flex; gap: 15px; align-items: center; }
+
+        .option-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            width: 100%;
+            margin: 15px 0;
+        }
+        .opt-btn {
+            border: 2px solid var(--ink);
+            background: var(--paper);
+            padding: 12px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+            font-size: 12px;
+            transition: 0.2s;
+        }
+        .opt-btn.active {
+            background: var(--gold);
+            transform: scale(1.05);
+            box-shadow: 4px 4px 0px var(--ink);
+        }
+        .btn-style-trigger {
+            background: var(--ink);
+            color: var(--paper);
+            border: none;
+            padding: 8px 15px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px 3px;
+        }
     </style>
 </head>
 <body oncontextmenu="return false;"> 
@@ -273,11 +317,11 @@
         <div id="overlay">
             <div style="display: flex; flex-direction: column; align-items: center;">
                 <div id="highScoreDisplay" class="high-score-text">BEST: 0</div>
-                <div class="tagline">FLAPPY GHOST</div>
-                <div class="sub-tagline">V- 0.5.0</div>
+                <div class="tagline">GHOST_CHAT</div>
+                <div class="sub-tagline">No Phone. No Email. No Data.</div>
                 
                 <button id="pwaInstallBtn" class="btn-install-main" onclick="handleInstallClick()">
-                    ADD TO HOMESCREEN
+                    INSTALL GAME
                 </button>
             </div>
             
@@ -295,7 +339,7 @@
                 <button class="btn-share-refined" onclick="shareScore()">
                     <div class="symbol-mini-ghost">
                         <div id="miniGhostBody" class="mini-ghost-body"></div>
-                        <div id="miniGhostEyes" class="mini-ghost-eyes"></div>
+                        <canvas id="miniGhostEyes" width="22" height="26" class="mini-ghost-eyes"></canvas>
                     </div> 
                     <span>Share SCORE!</span>
                 </button>
@@ -310,10 +354,75 @@
 
         <div id="custom-modal" class="modal">
             <div class="modal-title" style="font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid var(--ink);">EDIT GHOST</div>
-            <div class="preview-box"><canvas id="previewCanvas" width="80" height="80"></canvas></div>
-            <div style="display: flex; justify-content: space-between; width: 100%; margin: 10px 0; align-items: center;"><label>Body:</label><input type="color" id="bodyColorPicker" value="#fffcf2" oninput="updatePreview()"></div>
-            <div style="display: flex; justify-content: space-between; width: 100%; margin: 10px 0; align-items: center;"><label>Eyes:</label><input type="color" id="eyeColorPicker" value="#2b2b2b" oninput="updatePreview()"></div>
+            <div class="preview-box"><canvas id="previewCanvas" width="100" height="120"></canvas></div>
+            
+            <div style="display: flex; justify-content: space-between; width: 100%; margin: 6px 0; align-items: center;">
+                <label>Body:</label>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <button class="btn-style-trigger" onclick="toggleBodyModal(true)">STYLE</button>
+                    <input type="color" id="bodyColorPicker" value="#fffcf2" oninput="updateGhostUI();">
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; width: 100%; margin: 6px 0; align-items: center;">
+                <label>Eyes:</label>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <button class="btn-style-trigger" onclick="toggleEyeModal(true)">STYLE</button>
+                    <input type="color" id="eyeColorPicker" value="#2b2b2b" oninput="updateGhostUI();">
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; width: 100%; margin: 6px 0; align-items: center;">
+                <label>Mouth:</label>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <button class="btn-style-trigger" onclick="toggleMouthModal(true)">STYLE</button>
+                    <input type="color" id="mouthColorPicker" value="#2b2b2b" oninput="updateGhostUI();">
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; width: 100%; margin: 6px 0; align-items: center;">
+                <label>Trail:</label>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 10px; opacity: 0.6;">COLOR</span>
+                    <input type="color" id="trailColorPicker" value="#2b2b2b" oninput="updateGhostUI();">
+                </div>
+            </div>
+            
             <button class="btn-customize" style="width: 100%; border-radius: var(--squircle);" onclick="toggleModal(false)">Apply</button>
+        </div>
+
+        <div id="eye-modal" class="modal">
+            <div class="modal-title" style="font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid var(--ink); width: 100%; text-align: center;">EYE DESIGN</div>
+            <div class="option-grid">
+                <div class="opt-btn eye-opt" data-style="classic" onclick="selectEyeStyle('classic')">CLASSIC</div>
+                <div class="opt-btn eye-opt" data-style="blink" onclick="selectEyeStyle('blink')">BLINK</div>
+                <div class="opt-btn eye-opt" data-style="hacker" onclick="selectEyeStyle('hacker')">HACKER</div>
+                <div class="opt-btn eye-opt" data-style="angry" onclick="selectEyeStyle('angry')">ANGRY</div>
+            </div>
+            <button class="btn-customize" style="width: 100%; border-radius: var(--squircle); background: var(--ink); color: var(--paper);" onclick="toggleEyeModal(false)">Done</button>
+        </div>
+
+        <div id="mouth-modal" class="modal">
+            <div class="modal-title" style="font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid var(--ink); width: 100%; text-align: center;">MOUTH DESIGN</div>
+            <div class="option-grid">
+                <div class="opt-btn mouth-opt" data-style="none" onclick="selectMouthStyle('none')">NONE</div>
+                <div class="opt-btn mouth-opt" data-style="smile" onclick="selectMouthStyle('smile')">SMILE</div>
+                <div class="opt-btn mouth-opt" data-style="ooh" onclick="selectMouthStyle('ooh')">OOH</div>
+                <div class="opt-btn mouth-opt" data-style="vamp" onclick="selectMouthStyle('vamp')">VAMP</div>
+                <div class="opt-btn mouth-opt" data-style="flat" onclick="selectMouthStyle('flat')">FLAT</div>
+            </div>
+            <button class="btn-customize" style="width: 100%; border-radius: var(--squircle); background: var(--ink); color: var(--paper);" onclick="toggleMouthModal(false)">Done</button>
+        </div>
+
+        <div id="body-modal" class="modal">
+            <div class="modal-title" style="font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid var(--ink); width: 100%; text-align: center;">BODY STYLE</div>
+            <div class="option-grid">
+                <div class="opt-btn body-opt" data-style="classic" onclick="selectBodyStyle('classic')">CLASSIC</div>
+                <div class="opt-btn body-opt" data-style="bobble" onclick="selectBodyStyle('bobble')">BUBBLE</div>
+                <div class="opt-btn body-opt" data-style="spiky" onclick="selectBodyStyle('spiky')">SHARD</div>
+                <div class="opt-btn body-opt" data-style="slim" onclick="selectBodyStyle('slim')">PILLAR</div>
+            </div>
+            <button class="btn-customize" style="width: 100%; border-radius: var(--squircle); background: var(--ink); color: var(--paper);" onclick="toggleBodyModal(false)">Done</button>
         </div>
 
         <div id="settings-modal" class="modal">
@@ -326,7 +435,8 @@
                 <label>Mute Click:</label>
                 <div id="clickMuteToggle" class="toggle-switch" onclick="toggleClickMute()"><div class="toggle-knob"></div></div>
             </div>
-            <button class="btn-customize" style="width: 100%; border-radius: var(--squircle); margin-top: 20px;" onclick="toggleSettings(false)">Close</button>
+            <button class="btn-install-settings" onclick="handleInstallClick()">INSTALL GAME</button>
+            <button class="btn-customize" style="width: 100%; border-radius: var(--squircle); margin-top: 15px;" onclick="toggleSettings(false)">Close</button>
         </div>
 
         <div class="ui-panel">
@@ -350,12 +460,18 @@
         const deathScreen = document.getElementById('death-screen');
         const highScoreDisplay = document.getElementById('highScoreDisplay');
         const customModal = document.getElementById('custom-modal');
+        const eyeModal = document.getElementById('eye-modal');
+        const mouthModal = document.getElementById('mouth-modal');
+        const bodyModal = document.getElementById('body-modal');
         const settingsModal = document.getElementById('settings-modal');
         const bodyColorPicker = document.getElementById('bodyColorPicker');
         const eyeColorPicker = document.getElementById('eyeColorPicker');
+        const mouthColorPicker = document.getElementById('mouthColorPicker');
+        const trailColorPicker = document.getElementById('trailColorPicker');
         const toast = document.getElementById('toast');
         const miniGhostBody = document.getElementById('miniGhostBody');
-        const miniGhostEyes = document.getElementById('miniGhostEyes');
+        const miniGhostEyesCanvas = document.getElementById('miniGhostEyes');
+        const mCtx = miniGhostEyesCanvas.getContext('2d');
         const pwaInstallBtn = document.getElementById('pwaInstallBtn');
 
         function resizeCanvas() {
@@ -367,26 +483,48 @@
 
         let ghostBodyColor = localStorage.getItem('ghostBody') || "#fffcf2";
         let ghostEyeColor = localStorage.getItem('ghostEye') || "#2b2b2b";
+        let ghostMouthColor = localStorage.getItem('ghostMouth') || "#2b2b2b";
+        let ghostTrailColor = localStorage.getItem('ghostTrail') || "#2b2b2b";
+        let ghostBodyStyle = localStorage.getItem('ghostBodyStyle') || "classic";
+        let ghostEyeStyle = localStorage.getItem('ghostEyeStyle') || "classic";
+        let ghostMouthStyle = localStorage.getItem('ghostMouthStyle') || "none";
         let isMuted = localStorage.getItem('ghostMuted') === 'true';
         let isClickMuted = localStorage.getItem('ghostClickMuted') === 'true';
         let isPaused = false;
         
         bodyColorPicker.value = ghostBodyColor;
         eyeColorPicker.value = ghostEyeColor;
-        updateGhostUI();
-
-        if(isMuted) document.getElementById('muteToggle').classList.add('toggle-active');
-        if(isClickMuted) document.getElementById('clickMuteToggle').classList.add('toggle-active');
+        mouthColorPicker.value = ghostMouthColor;
+        trailColorPicker.value = ghostTrailColor;
 
         function updateGhostUI() {
+            ghostBodyColor = bodyColorPicker.value;
+            ghostEyeColor = eyeColorPicker.value;
+            ghostMouthColor = mouthColorPicker.value;
+            ghostTrailColor = trailColorPicker.value;
+            
             miniGhostBody.style.backgroundColor = ghostBodyColor;
-            miniGhostEyes.style.backgroundColor = ghostEyeColor;
-            miniGhostEyes.style.boxShadow = `10px 0 0 ${ghostEyeColor}`;
-            const styleId = 'mini-ghost-style';
-            let styleTag = document.getElementById(styleId) || document.createElement('style');
-            styleTag.id = styleId;
-            styleTag.innerHTML = `.mini-ghost-body::after { background: ${ghostBodyColor}; }`;
-            document.head.appendChild(styleTag);
+            
+            if(ghostBodyStyle === 'bobble') { 
+                miniGhostBody.style.borderRadius = "50%"; miniGhostBody.style.clipPath = "none"; 
+                miniGhostBody.style.transform = "none";
+            } else if(ghostBodyStyle === 'slim') { 
+                miniGhostBody.style.borderRadius = "5px"; miniGhostBody.style.clipPath = "none";
+                miniGhostBody.style.transform = "scaleX(0.7)";
+            } else if(ghostBodyStyle === 'spiky') { 
+                miniGhostBody.style.borderRadius = "0"; miniGhostBody.style.clipPath = "polygon(50% 0%, 100% 25%, 100% 75%, 75% 100%, 50% 80%, 25% 100%, 0% 75%, 0% 25%)"; 
+                miniGhostBody.style.transform = "none";
+            } else { 
+                miniGhostBody.style.borderRadius = "12px 12px 0 0"; miniGhostBody.style.transform = "none";
+                miniGhostBody.style.clipPath = "polygon(0% 0%, 100% 0%, 100% 85%, 75% 100%, 50% 85%, 25% 100%, 0% 85%)"; 
+            }
+
+            mCtx.clearRect(0, 0, miniGhostEyesCanvas.width, miniGhostEyesCanvas.height);
+            mCtx.save();
+            mCtx.translate(miniGhostEyesCanvas.width/2, miniGhostEyesCanvas.height/2 - 2);
+            mCtx.scale(0.5, 0.5); 
+            drawFacialFeatures(mCtx, ghostEyeColor, ghostMouthColor, ghostEyeStyle, ghostMouthStyle);
+            mCtx.restore();
         }
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -450,14 +588,62 @@
         function toggleModal(show) {
             playSound(show ? 'nav_click' : 'sys_click');
             customModal.style.display = show ? 'flex' : 'none';
-            if (show) { updatePreview(); isPaused = true; }
+            if (show) { isPaused = true; }
             else { 
-                ghostBodyColor = bodyColorPicker.value;
-                ghostEyeColor = eyeColorPicker.value;
-                localStorage.setItem('ghostBody', ghostBodyColor);
-                localStorage.setItem('ghostEye', ghostEyeColor);
+                localStorage.setItem('ghostBody', bodyColorPicker.value);
+                localStorage.setItem('ghostEye', eyeColorPicker.value);
+                localStorage.setItem('ghostMouth', mouthColorPicker.value);
+                localStorage.setItem('ghostTrail', trailColorPicker.value);
                 updateGhostUI(); isPaused = false;
             }
+        }
+
+        function toggleEyeModal(show) {
+            playSound(show ? 'nav_click' : 'sys_click');
+            eyeModal.style.display = show ? 'flex' : 'none';
+            if(show) highlightActiveOptions('eye-opt', ghostEyeStyle);
+        }
+
+        function selectEyeStyle(style) {
+            playSound('sys_click');
+            ghostEyeStyle = style;
+            localStorage.setItem('ghostEyeStyle', style);
+            highlightActiveOptions('eye-opt', style);
+            updateGhostUI();
+        }
+
+        function toggleMouthModal(show) {
+            playSound(show ? 'nav_click' : 'sys_click');
+            mouthModal.style.display = show ? 'flex' : 'none';
+            if(show) highlightActiveOptions('mouth-opt', ghostMouthStyle);
+        }
+
+        function selectMouthStyle(style) {
+            playSound('sys_click');
+            ghostMouthStyle = style;
+            localStorage.setItem('ghostMouthStyle', style);
+            highlightActiveOptions('mouth-opt', style);
+            updateGhostUI();
+        }
+
+        function toggleBodyModal(show) {
+            playSound(show ? 'nav_click' : 'sys_click');
+            bodyModal.style.display = show ? 'flex' : 'none';
+            if(show) highlightActiveOptions('body-opt', ghostBodyStyle);
+        }
+
+        function selectBodyStyle(style) {
+            playSound('sys_click');
+            ghostBodyStyle = style;
+            localStorage.setItem('ghostBodyStyle', style);
+            highlightActiveOptions('body-opt', style);
+            updateGhostUI();
+        }
+
+        function highlightActiveOptions(className, currentStyle) {
+            document.querySelectorAll('.' + className).forEach(opt => {
+                opt.classList.toggle('active', opt.dataset.style === currentStyle);
+            });
         }
 
         function toggleSettings(show) {
@@ -482,24 +668,18 @@
             playSound('sys_click');
         }
 
-        // FULLSCREEN HELPER
         function goFullScreen() {
             const doc = window.document;
             const docEl = doc.documentElement;
-            const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
-            if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
-                if (requestFullScreen) {
-                    requestFullScreen.call(docEl).catch(err => {
-                        console.log(`Error attempting to enable full-screen: ${err.message}`);
-                    });
-                }
+            const requestFullScreen = docEl.requestFullscreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+            if (!doc.fullscreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+                if (requestFullScreen) requestFullScreen.call(docEl).catch(e => console.log(e));
             }
         }
 
         function startGame() {
             if (gameRunning || customModal.style.display === 'flex' || settingsModal.style.display === 'flex') return;
-            goFullScreen(); // Attempt Fullscreen on start
-            playSound('action_click'); startBackgroundMusic(); overlay.style.display = 'none'; deathScreen.style.display = 'none'; gameRunning = true;
+            goFullScreen(); playSound('action_click'); startBackgroundMusic(); overlay.style.display = 'none'; deathScreen.style.display = 'none'; gameRunning = true;
         }
 
         function resetGame() { playSound('action_click'); initGameState(); startGame(); }
@@ -508,27 +688,15 @@
         async function shareScore() {
             playSound('action_click');
             const finalScore = Math.floor(score);
-            const bestScore = localStorage.getItem('ghostChatHighScore') || finalScore;
-            const currentUrl = window.location.href;
-            const message = `Flappy Ghost | GHOST_CHAT\nMy score: ${finalScore}\nBest: ${bestScore}\n\nPlay here: ${currentUrl}`;
+            const message = `Flappy Ghost | GHOST_CHAT\nMy score: ${finalScore}\n\nPlay here: ${window.location.href}`;
             if (navigator.share) {
-                try {
-                    await navigator.share({ title: 'GHOST_CHAT', text: message });
-                    return; 
-                } catch (err) { console.log("Native share failed"); }
+                try { await navigator.share({ title: 'GHOST_CHAT', text: message }); return; } catch (err) {}
             }
-            const waUrl = `whatsapp://send?text=${encodeURIComponent(message)}`;
-            const start = Date.now();
-            window.location.href = waUrl;
-            setTimeout(() => { if (Date.now() - start < 600) copyToClipboard(message); }, 500);
+            copyToClipboard(message);
         }
 
         function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                showToast("Transmission Copied!");
-            }).catch(() => {
-                showToast("Transmission Failed.");
-            });
+            navigator.clipboard.writeText(text).then(() => showToast("Transmission Copied!")).catch(() => showToast("Failed."));
         }
 
         function showToast(msg) {
@@ -537,6 +705,8 @@
         }
 
         let ghost, pipes, frame, score, hackerMode, gameRunning, gameSpeed, spawnTimer;
+        let previewFrame = 0;
+        let previewTrail = [];
 
         function initGameState() {
             ghost = { x: 50, y: 300, w: 45, h: 55, velocity: 0, gravity: 0.25, jump: -5.8, isDead: false, trail: [], particles: [] };
@@ -546,6 +716,7 @@
             highScoreDisplay.innerText = `BEST: ${storedHigh}`;
             overlay.style.display = 'flex'; deathScreen.style.display = 'none';
             wrapper.classList.remove('hacker-zoom-active'); scoreContainer.classList.remove('glitch-text');
+            updateGhostUI();
         }
 
         const flap = (e) => { 
@@ -569,32 +740,80 @@
             else { wrapper.classList.remove('hacker-zoom-active'); scoreContainer.classList.remove('glitch-text'); }
         }
 
+        function drawBody(c, color, style) {
+            c.fillStyle = color; c.strokeStyle = "#2b2b2b"; c.lineWidth = 3; c.beginPath();
+            if (style === 'bobble') { c.arc(0, 0, 24, 0, Math.PI * 2); }
+            else if (style === 'spiky') { 
+                c.moveTo(0, -30); c.lineTo(25, -10); c.lineTo(18, 25); c.lineTo(-18, 25); c.lineTo(-25, -10);
+            }
+            else if (style === 'slim') { c.roundRect(-15, -30, 30, 60, 10); }
+            else { 
+                c.moveTo(-20, -10); c.bezierCurveTo(-20, -35, 20, -35, 20, -10); 
+                c.lineTo(20, 20); c.quadraticCurveTo(10, 30, 0, 20); c.quadraticCurveTo(-10, 30, -20, 20); 
+            }
+            c.closePath(); c.fill(); c.stroke();
+        }
+
+        function drawFacialFeatures(context, eColor, mColor, eStyle, mStyle) {
+            context.fillStyle = eColor; context.strokeStyle = eColor; context.lineWidth = 2;
+            if (eStyle === 'classic') {
+                context.beginPath(); context.ellipse(-7, -8, 3.5, 6, 0, 0, Math.PI * 2); context.ellipse(7, -8, 3.5, 6, 0, 0, Math.PI * 2); context.fill();
+            } else if (eStyle === 'blink') {
+                context.beginPath(); context.fillRect(-10, -8, 7, 2); context.fillRect(3, -8, 7, 2); context.fill();
+            } else if (eStyle === 'hacker') {
+                context.font = "bold 12px Courier"; context.fillText("<>", -12, -4);
+            } else if (eStyle === 'angry') {
+                context.beginPath(); context.moveTo(-11, -12); context.lineTo(-4, -8); context.lineTo(-11, -4); context.moveTo(11, -12); context.lineTo(4, -8); context.lineTo(11, -4); context.stroke();
+            }
+            context.strokeStyle = mColor; context.fillStyle = mColor;
+            if (mStyle === 'smile') {
+                context.beginPath(); context.arc(0, 2, 6, 0, Math.PI); context.stroke();
+            } else if (mStyle === 'ooh') {
+                context.beginPath(); context.arc(0, 6, 3, 0, Math.PI * 2); context.stroke();
+            } else if (mStyle === 'vamp') {
+                context.beginPath(); context.moveTo(-6, 4); context.lineTo(6, 4); context.stroke();
+                context.beginPath(); context.moveTo(-4, 4); context.lineTo(-3, 8); context.lineTo(-2, 4); context.fill();
+                context.beginPath(); context.moveTo(4, 4); context.lineTo(3, 8); context.lineTo(2, 4); context.fill();
+            } else if (mStyle === 'flat') {
+                context.beginPath(); context.moveTo(-5, 6); context.lineTo(5, 6); context.stroke();
+            }
+        }
+
+        // Live Preview with floating movement
         function updatePreview() {
+            if (customModal.style.display !== 'flex') return;
+            previewFrame++;
+            const floatY = Math.sin(previewFrame * 0.08) * 20;
+            
             pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
-            pCtx.save(); pCtx.translate(pCanvas.width/2, pCanvas.height/2 + 5);
-            pCtx.strokeStyle = "#2b2b2b"; pCtx.lineWidth = 3; pCtx.fillStyle = bodyColorPicker.value;
-            pCtx.beginPath(); pCtx.moveTo(-20, -10); pCtx.bezierCurveTo(-20, -35, 20, -35, 20, -10);
-            pCtx.lineTo(20, 20); pCtx.quadraticCurveTo(10, 30, 0, 20); pCtx.quadraticCurveTo(-10, 30, -20, 20);
-            pCtx.closePath(); pCtx.fill(); pCtx.stroke();
-            pCtx.fillStyle = eyeColorPicker.value;
-            pCtx.beginPath(); pCtx.ellipse(-7, -8, 3.5, 6, 0, 0, Math.PI * 2); pCtx.ellipse(7, -8, 3.5, 6, 0, 0, Math.PI * 2);
-            pCtx.fill(); pCtx.restore();
+            
+            // Generate preview trail
+            if (previewFrame % 4 === 0) previewTrail.push({ y: floatY, a: 0.4, x: pCanvas.width/2 });
+            
+            previewTrail.forEach((t, i) => {
+                pCtx.save();
+                pCtx.globalAlpha = t.a;
+                pCtx.translate(t.x, pCanvas.height/2 + t.y);
+                drawBody(pCtx, ghostTrailColor, ghostBodyStyle);
+                pCtx.restore();
+                t.x -= 1.5; // Move trail left in preview
+                t.a -= 0.015;
+                if (t.a <= 0 || t.x < -50) previewTrail.splice(i, 1);
+            });
+
+            pCtx.save(); 
+            pCtx.translate(pCanvas.width/2, pCanvas.height/2 + floatY);
+            drawBody(pCtx, bodyColorPicker.value, ghostBodyStyle);
+            drawFacialFeatures(pCtx, eyeColorPicker.value, mouthColorPicker.value, ghostEyeStyle, ghostMouthStyle);
+            pCtx.restore();
         }
 
         function renderGhostModel(x, y, isTrail) {
             ctx.save(); ctx.translate(x + ghost.w/2, y + ghost.h/2);
             if(!isTrail) ctx.rotate(Math.min(0.4, Math.max(-0.4, ghost.velocity * 0.1)));
-            ctx.strokeStyle = varColor('--ink'); ctx.lineWidth = 3;
-            ctx.fillStyle = isTrail ? "rgba(43,43,43,0.1)" : ghostBodyColor;
-            if(hackerMode && !isTrail) { ctx.shadowBlur = 15; ctx.shadowColor = varColor('--gold'); ctx.strokeStyle = varColor('--gold'); }
-            ctx.beginPath(); ctx.moveTo(-20, -10); ctx.bezierCurveTo(-20, -35, 20, -35, 20, -10);
-            ctx.lineTo(20, 20); ctx.quadraticCurveTo(10, 30, 0, 20); ctx.quadraticCurveTo(-10, 30, -20, 20);
-            ctx.closePath(); ctx.fill(); ctx.stroke();
-            if(!isTrail) {
-                ctx.fillStyle = hackerMode ? varColor('--gold') : ghostEyeColor;
-                ctx.beginPath(); ctx.ellipse(-7, -8, 3.5, 6, 0, 0, Math.PI * 2); ctx.ellipse(7, -8, 3.5, 6, 0, 0, Math.PI * 2);
-                ctx.fill();
-            }
+            if(hackerMode && !isTrail) { ctx.shadowBlur = 15; ctx.shadowColor = varColor('--gold'); }
+            drawBody(ctx, isTrail ? ghostTrailColor : ghostBodyColor, ghostBodyStyle);
+            if(!isTrail) drawFacialFeatures(ctx, hackerMode ? varColor('--gold') : ghostEyeColor, hackerMode ? varColor('--gold') : ghostMouthColor, ghostEyeStyle, ghostMouthStyle);
             ctx.restore();
         }
 
@@ -623,8 +842,7 @@
             spawnTimer--;
             if (spawnTimer <= 0) {
                 let gap = 170; let h = Math.random() * (canvas.height - gap - 160) + 80;
-                pipes.push({ x: canvas.width, y: 0, w: 65, h: h, passed: false });
-                pipes.push({ x: canvas.width, y: h + gap, w: 65, h: canvas.height - h - gap, passed: false });
+                pipes.push({ x: canvas.width, y: 0, w: 65, h: h, passed: false }, { x: canvas.width, y: h + gap, w: 65, h: canvas.height - h - gap, passed: false });
                 spawnTimer = currentSpawnGap;
             }
             pipes.forEach(p => {
@@ -655,20 +873,16 @@
             }
         }
 
-        function loop() { update(); draw(); requestAnimationFrame(loop); }
+        function loop() { update(); draw(); updatePreview(); requestAnimationFrame(loop); }
         initGameState(); loop();
 
         let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault(); deferredPrompt = e;
-            pwaInstallBtn.style.display = 'block';
-        });
-
+        window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; pwaInstallBtn.style.display = 'block'; });
         async function handleInstallClick() {
-            if (!deferredPrompt) return;
+            if (!deferredPrompt) { showToast("Open in Chrome/Safari to Install."); return; }
             deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
-            if (outcome === 'accepted') pwaInstallBtn.style.display = 'none';
+            if (outcome === 'accepted') { pwaInstallBtn.style.display = 'none'; showToast("Installation Successful!"); }
             deferredPrompt = null;
         }
 
