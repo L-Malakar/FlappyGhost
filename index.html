@@ -36,12 +36,6 @@
             transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        /* Constraint: Hacker Mode zoom in/out animation */
-        .hacker-zoom-active {
-            transform: scale(1.15); 
-            border-color: #00ff00 !important; 
-        }
-
         @media (max-width: 420px) {
             #game-wrapper {
                 width: 100vw;
@@ -57,6 +51,22 @@
         .btn-start, .btn-home-box, .btn-share-refined, .modal, .score-box, .btn-install-settings, .opt-btn {
             border-radius: var(--squircle);
         }
+
+        /* Scrollbar Styling for Style Windows */
+        .option-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            width: 100%;
+            margin: 10px 0;
+            max-height: 180px; /* Reduced height to keep preview visible */
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .option-grid::-webkit-scrollbar { width: 6px; }
+        .option-grid::-webkit-scrollbar-track { background: transparent; }
+        .option-grid::-webkit-scrollbar-thumb { background: var(--ink); border-radius: 10px; }
 
         .symbol-home {
             width: 20px; height: 14px;
@@ -228,10 +238,36 @@
             box-shadow: 10px 10px 0px var(--ink);
         }
 
-        #eye-modal, #mouth-modal, #body-modal {
-            top: auto; bottom: 20px;
+        /* Slot Selector Styles */
+        .slot-selector {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .slot-btn {
+            background: var(--paper);
+            border: 2px solid var(--ink);
+            padding: 5px 8px;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .slot-btn.active {
+            background: var(--ink);
+            color: var(--paper);
+        }
+
+        /* Smaller sub-modals positioned at the bottom */
+        #eye-modal, #mouth-modal, #body-modal, #hat-modal, #trail-modal {
+            top: auto; bottom: 10px;
             transform: translate(-50%, 0);
             width: 90%;
+            padding: 15px;
         }
 
         .preview-box {
@@ -243,20 +279,12 @@
             overflow: hidden;
         }
 
-        /* Branding Change */
         .tagline { font-size: 24px; color: var(--ink); letter-spacing: 2px; font-weight: bold; margin-top: 40px; }
         .sub-tagline { font-size: 14px; margin-top: 5px; font-weight: bold; color: var(--gold); letter-spacing: 1px; }
         
         .high-score-text { font-size: 18px; color: var(--gold); text-shadow: 1px 1px 0px var(--ink); font-weight: bold; }
 
         .footer-credits { color: var(--paper); font-size: 12px; margin-top: 30px; opacity: 0.6; letter-spacing: 1px; }
-
-        .glitch-text { animation: glitch 0.2s infinite; color: var(--gold) !important; }
-        @keyframes glitch {
-            0% { transform: translate(0); }
-            50% { transform: translate(-2px, 2px); }
-            100% { transform: translate(2px, -2px); }
-        }
 
         .toggle-switch {
             width: 50px; height: 25px;
@@ -280,13 +308,6 @@
 
         .death-actions { display: flex; gap: 15px; align-items: center; }
 
-        .option-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            width: 100%;
-            margin: 15px 0;
-        }
         .opt-btn {
             border: 2px solid var(--ink);
             background: var(--paper);
@@ -294,7 +315,7 @@
             cursor: pointer;
             text-align: center;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 10px;
             transition: 0.2s;
         }
         .opt-btn.active {
@@ -302,6 +323,14 @@
             transform: scale(1.05);
             box-shadow: 4px 4px 0px var(--ink);
         }
+
+        /* Hacker Mode Animation */
+        @keyframes hackerZoom {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+        .hacker-anim { animation: hackerZoom 0.5s ease-in-out infinite; }
+
         .btn-style-trigger {
             background: var(--ink);
             color: var(--paper);
@@ -321,8 +350,8 @@
         <div id="overlay">
             <div style="display: flex; flex-direction: column; align-items: center;">
                 <div id="highScoreDisplay" class="high-score-text">BEST: 0</div>
-                <div class="tagline">FLAPPY GHOST</div>
-                <div class="sub-tagline">V- 1.6</div>
+                <div class="tagline">GHOST_CHAT</div>
+                <div class="sub-tagline">V- 0.1(Beta)</div>
                 
                 <button id="pwaInstallBtn" class="btn-install-main" onclick="handleInstallClick()">
                     INSTALL GAME
@@ -357,10 +386,19 @@
         </div>
 
         <div id="custom-modal" class="modal">
-            <div class="modal-title" style="font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid var(--ink);">EDIT GHOST</div>
+            <div class="modal-title" style="font-weight: bold; margin-bottom: 5px; border-bottom: 2px solid var(--ink);">EDIT GHOST</div>
+            
+            <div class="slot-selector">
+                <button class="slot-btn active" onclick="switchGhostSlot(1)">GHOST 1</button>
+                <button class="slot-btn" onclick="switchGhostSlot(2)">GHOST 2</button>
+                <button class="slot-btn" onclick="switchGhostSlot(3)">GHOST 3</button>
+                <button class="slot-btn" onclick="switchGhostSlot(4)">GHOST 4</button>
+                <button class="slot-btn" onclick="switchGhostSlot(5)">GHOST 5</button>
+            </div>
+
             <div class="preview-box"><canvas id="previewCanvas" width="100" height="120"></canvas></div>
             
-            <div style="display: flex; justify-content: space-between; width: 100%; margin: 6px 0; align-items: center;">
+            <div style="display: flex; justify-content: space-between; width: 100%; margin: 4px 0; align-items: center;">
                 <label>Body:</label>
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <button class="btn-style-trigger" onclick="toggleBodyModal(true)">STYLE</button>
@@ -368,7 +406,7 @@
                 </div>
             </div>
             
-            <div style="display: flex; justify-content: space-between; width: 100%; margin: 6px 0; align-items: center;">
+            <div style="display: flex; justify-content: space-between; width: 100%; margin: 4px 0; align-items: center;">
                 <label>Eyes:</label>
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <button class="btn-style-trigger" onclick="toggleEyeModal(true)">STYLE</button>
@@ -376,7 +414,7 @@
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; width: 100%; margin: 6px 0; align-items: center;">
+            <div style="display: flex; justify-content: space-between; width: 100%; margin: 4px 0; align-items: center;">
                 <label>Mouth:</label>
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <button class="btn-style-trigger" onclick="toggleMouthModal(true)">STYLE</button>
@@ -384,10 +422,18 @@
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; width: 100%; margin: 6px 0; align-items: center;">
+            <div style="display: flex; justify-content: space-between; width: 100%; margin: 4px 0; align-items: center;">
+                <label>Hat:</label>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <button class="btn-style-trigger" onclick="toggleHatModal(true)">STYLE</button>
+                    <input type="color" id="hatColorPicker" value="#d4af37" oninput="updateGhostUI();">
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; width: 100%; margin: 4px 0; align-items: center;">
                 <label>Trail:</label>
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 10px; opacity: 0.6;">COLOR</span>
+                    <button class="btn-style-trigger" onclick="toggleTrailModal(true)">STYLE</button>
                     <input type="color" id="trailColorPicker" value="#2b2b2b" oninput="updateGhostUI();">
                 </div>
             </div>
@@ -396,37 +442,33 @@
         </div>
 
         <div id="eye-modal" class="modal">
-            <div class="modal-title" style="font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid var(--ink); width: 100%; text-align: center;">EYE DESIGN</div>
-            <div class="option-grid">
-                <div class="opt-btn eye-opt" data-style="classic" onclick="selectEyeStyle('classic')">CLASSIC</div>
-                <div class="opt-btn eye-opt" data-style="blink" onclick="selectEyeStyle('blink')">BLINK</div>
-                <div class="opt-btn eye-opt" data-style="hacker" onclick="selectEyeStyle('hacker')">HACKER</div>
-                <div class="opt-btn eye-opt" data-style="angry" onclick="selectEyeStyle('angry')">ANGRY</div>
-            </div>
-            <button class="btn-customize" style="width: 100%; border-radius: var(--squircle); background: var(--ink); color: var(--paper);" onclick="toggleEyeModal(false)">Done</button>
+            <div class="modal-title" style="font-size: 14px; font-weight: bold; margin-bottom: 5px; border-bottom: 2px solid var(--ink); width: 100%; text-align: center;">EYES</div>
+            <div class="option-grid" id="eye-options"></div>
+            <button class="btn-customize" style="padding: 8px; width: 100%; border-radius: var(--squircle); background: var(--ink); color: var(--paper);" onclick="toggleEyeModal(false)">Done</button>
         </div>
 
         <div id="mouth-modal" class="modal">
-            <div class="modal-title" style="font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid var(--ink); width: 100%; text-align: center;">MOUTH DESIGN</div>
-            <div class="option-grid">
-                <div class="opt-btn mouth-opt" data-style="none" onclick="selectMouthStyle('none')">NONE</div>
-                <div class="opt-btn mouth-opt" data-style="smile" onclick="selectMouthStyle('smile')">SMILE</div>
-                <div class="opt-btn mouth-opt" data-style="ooh" onclick="selectMouthStyle('ooh')">OOH</div>
-                <div class="opt-btn mouth-opt" data-style="vamp" onclick="selectMouthStyle('vamp')">VAMP</div>
-                <div class="opt-btn mouth-opt" data-style="flat" onclick="selectMouthStyle('flat')">FLAT</div>
-            </div>
-            <button class="btn-customize" style="width: 100%; border-radius: var(--squircle); background: var(--ink); color: var(--paper);" onclick="toggleMouthModal(false)">Done</button>
+            <div class="modal-title" style="font-size: 14px; font-weight: bold; margin-bottom: 5px; border-bottom: 2px solid var(--ink); width: 100%; text-align: center;">MOUTH</div>
+            <div class="option-grid" id="mouth-options"></div>
+            <button class="btn-customize" style="padding: 8px; width: 100%; border-radius: var(--squircle); background: var(--ink); color: var(--paper);" onclick="toggleMouthModal(false)">Done</button>
         </div>
 
         <div id="body-modal" class="modal">
-            <div class="modal-title" style="font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid var(--ink); width: 100%; text-align: center;">BODY STYLE</div>
-            <div class="option-grid">
-                <div class="opt-btn body-opt" data-style="classic" onclick="selectBodyStyle('classic')">CLASSIC</div>
-                <div class="opt-btn body-opt" data-style="bobble" onclick="selectBodyStyle('bobble')">BUBBLE</div>
-                <div class="opt-btn body-opt" data-style="spiky" onclick="selectBodyStyle('spiky')">SHARD</div>
-                <div class="opt-btn body-opt" data-style="slim" onclick="selectBodyStyle('slim')">PILLAR</div>
-            </div>
-            <button class="btn-customize" style="width: 100%; border-radius: var(--squircle); background: var(--ink); color: var(--paper);" onclick="toggleBodyModal(false)">Done</button>
+            <div class="modal-title" style="font-size: 14px; font-weight: bold; margin-bottom: 5px; border-bottom: 2px solid var(--ink); width: 100%; text-align: center;">BODY</div>
+            <div class="option-grid" id="body-options"></div>
+            <button class="btn-customize" style="padding: 8px; width: 100%; border-radius: var(--squircle); background: var(--ink); color: var(--paper);" onclick="toggleBodyModal(false)">Done</button>
+        </div>
+
+        <div id="hat-modal" class="modal">
+            <div class="modal-title" style="font-size: 14px; font-weight: bold; margin-bottom: 5px; border-bottom: 2px solid var(--ink); width: 100%; text-align: center;">HAT</div>
+            <div class="option-grid" id="hat-options"></div>
+            <button class="btn-customize" style="padding: 8px; width: 100%; border-radius: var(--squircle); background: var(--ink); color: var(--paper);" onclick="toggleHatModal(false)">Done</button>
+        </div>
+
+        <div id="trail-modal" class="modal">
+            <div class="modal-title" style="font-size: 14px; font-weight: bold; margin-bottom: 5px; border-bottom: 2px solid var(--ink); width: 100%; text-align: center;">TRAIL</div>
+            <div class="option-grid" id="trail-options"></div>
+            <button class="btn-customize" style="padding: 8px; width: 100%; border-radius: var(--squircle); background: var(--ink); color: var(--paper);" onclick="toggleTrailModal(false)">Done</button>
         </div>
 
         <div id="settings-modal" class="modal">
@@ -453,6 +495,34 @@
     <div class="footer-credits">Flappy Ghost | By L.Malakar</div>
 
     <script>
+        /* Configuration for Styles */
+        const EYE_STYLES = ['classic', 'blink', 'hacker', 'angry', 'surprised', 'tired', 'closed', 'monocle', 'pirate', 'sparkle', 'crying', 'laser', 'star', 'spiral', 'cyclops', 'creepy', 'shades', 'nerd', 'glitch', 'cute', 'void', 'flame', 'ghostly'];
+        const MOUTH_STYLES = ['none', 'smile', 'ooh', 'vamp', 'flat', 'grin', 'frown', 'tongue', 'whistle', 'moustache', 'beard', 'bucktooth', 'stitched', 'drool', 'zipper', 'cat', 'mask', 'teeth', 'bigsmile', 'tiny', 'wave', 'goldtooth', 'scared'];
+        const BODY_STYLES = ['classic', 'bobble', 'spiky', 'slim', 'heavy', 'ghostly', 'diamond', 'star', 'heart', 'cloud', 'liquid', 'pixel', 'glitchy', 'fire', 'ice', 'wood', 'stone', 'leaf', 'metal', 'paper', 'ribbon', 'snake', 'blob'];
+        const HAT_STYLES = ['none', 'crown', 'halo', 'ninja', 'horns', 'tophat', 'beanie', 'beret', 'cowboy', 'viking', 'chef', 'wizard', 'party', 'tiara', 'antenna', 'flower', 'earmuffs', 'goggles', 'arrow', 'propeller', 'cat-ears', 'bunny-ears', 'shogun'];
+        const TRAIL_STYLES = ['classic', 'ghostly', 'fire', 'pixel', 'star', 'heart', 'cloud', 'smoke'];
+
+        /* UI Initialization for Styles */
+        function initStyleGrids() {
+            populateGrid('eye-options', EYE_STYLES, 'eye-opt', selectEyeStyle);
+            populateGrid('mouth-options', MOUTH_STYLES, 'mouth-opt', selectMouthStyle);
+            populateGrid('body-options', BODY_STYLES, 'body-opt', selectBodyStyle);
+            populateGrid('hat-options', HAT_STYLES, 'hat-opt', selectHatStyle);
+            populateGrid('trail-options', TRAIL_STYLES, 'trail-opt', selectTrailStyle);
+        }
+
+        function populateGrid(containerId, styles, className, clickFn) {
+            const container = document.getElementById(containerId);
+            styles.forEach(style => {
+                const btn = document.createElement('div');
+                btn.className = `opt-btn ${className}`;
+                btn.dataset.style = style;
+                btn.innerText = style.toUpperCase();
+                btn.onclick = () => clickFn(style);
+                container.appendChild(btn);
+            });
+        }
+
         /* Game Logic and References */
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -468,10 +538,13 @@
         const eyeModal = document.getElementById('eye-modal');
         const mouthModal = document.getElementById('mouth-modal');
         const bodyModal = document.getElementById('body-modal');
+        const hatModal = document.getElementById('hat-modal');
+        const trailModal = document.getElementById('trail-modal');
         const settingsModal = document.getElementById('settings-modal');
         const bodyColorPicker = document.getElementById('bodyColorPicker');
         const eyeColorPicker = document.getElementById('eyeColorPicker');
         const mouthColorPicker = document.getElementById('mouthColorPicker');
+        const hatColorPicker = document.getElementById('hatColorPicker');
         const trailColorPicker = document.getElementById('trailColorPicker');
         const toast = document.getElementById('toast');
         const miniGhostBody = document.getElementById('miniGhostBody');
@@ -486,30 +559,76 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        let ghostBodyColor = localStorage.getItem('ghostBody') || "#fffcf2";
-        let ghostEyeColor = localStorage.getItem('ghostEye') || "#2b2b2b";
-        let ghostMouthColor = localStorage.getItem('ghostMouth') || "#2b2b2b";
-        let ghostTrailColor = localStorage.getItem('ghostTrail') || "#2b2b2b";
-        let ghostBodyStyle = localStorage.getItem('ghostBodyStyle') || "classic";
-        let ghostEyeStyle = localStorage.getItem('ghostEyeStyle') || "classic";
-        let ghostMouthStyle = localStorage.getItem('ghostMouthStyle') || "none";
+        let currentSlot = parseInt(localStorage.getItem('ghostCurrentSlot')) || 1;
+        let ghostBodyColor, ghostEyeColor, ghostMouthColor, ghostHatColor, ghostTrailColor;
+        let ghostBodyStyle, ghostEyeStyle, ghostMouthStyle, ghostHatStyle, ghostTrailStyle;
+
+        function loadGhostSlot(slot) {
+            const suffix = slot === 1 ? "" : `_s${slot}`;
+            ghostBodyColor = localStorage.getItem(`ghostBody${suffix}`) || "#fffcf2";
+            ghostEyeColor = localStorage.getItem(`ghostEye${suffix}`) || "#2b2b2b";
+            ghostMouthColor = localStorage.getItem(`ghostMouth${suffix}`) || "#2b2b2b";
+            ghostHatColor = localStorage.getItem(`ghostHatColor${suffix}`) || "#d4af37";
+            ghostTrailColor = localStorage.getItem(`ghostTrail${suffix}`) || "#2b2b2b";
+            ghostBodyStyle = localStorage.getItem(`ghostBodyStyle${suffix}`) || "classic";
+            ghostEyeStyle = localStorage.getItem(`ghostEyeStyle${suffix}`) || "classic";
+            ghostMouthStyle = localStorage.getItem(`ghostMouthStyle${suffix}`) || "none";
+            ghostHatStyle = localStorage.getItem(`ghostHatStyle${suffix}`) || "none";
+            ghostTrailStyle = localStorage.getItem(`ghostTrailStyle${suffix}`) || "classic";
+
+            bodyColorPicker.value = ghostBodyColor;
+            eyeColorPicker.value = ghostEyeColor;
+            mouthColorPicker.value = ghostMouthColor;
+            hatColorPicker.value = ghostHatColor;
+            trailColorPicker.value = ghostTrailColor;
+            updateGhostUI();
+        }
+
+        function saveGhostSlot(slot) {
+            const suffix = slot === 1 ? "" : `_s${slot}`;
+            localStorage.setItem(`ghostBody${suffix}`, ghostBodyColor);
+            localStorage.setItem(`ghostEye${suffix}`, ghostEyeColor);
+            localStorage.setItem(`ghostMouth${suffix}`, ghostMouthColor);
+            localStorage.setItem(`ghostHatColor${suffix}`, ghostHatColor);
+            localStorage.setItem(`ghostTrail${suffix}`, ghostTrailColor);
+            localStorage.setItem(`ghostBodyStyle${suffix}`, ghostBodyStyle);
+            localStorage.setItem(`ghostEyeStyle${suffix}`, ghostEyeStyle);
+            localStorage.setItem(`ghostMouthStyle${suffix}`, ghostMouthStyle);
+            localStorage.setItem(`ghostHatStyle${suffix}`, ghostHatStyle);
+            localStorage.setItem(`ghostTrailStyle${suffix}`, ghostTrailStyle);
+            localStorage.setItem('ghostCurrentSlot', slot);
+        }
+
+        function switchGhostSlot(slot) {
+            playSound('nav_click');
+            currentSlot = slot;
+            loadGhostSlot(slot);
+            document.querySelectorAll('.slot-btn').forEach((btn, idx) => {
+                btn.classList.toggle('active', idx + 1 === slot);
+            });
+        }
+
+        loadGhostSlot(currentSlot);
+
         let isMuted = localStorage.getItem('ghostMuted') === 'true';
         let isClickMuted = localStorage.getItem('ghostClickMuted') === 'true';
         let isPaused = false;
-        
-        bodyColorPicker.value = ghostBodyColor;
-        eyeColorPicker.value = ghostEyeColor;
-        mouthColorPicker.value = ghostMouthColor;
-        trailColorPicker.value = ghostTrailColor;
 
         function updateGhostUI() {
             ghostBodyColor = bodyColorPicker.value;
             ghostEyeColor = eyeColorPicker.value;
             ghostMouthColor = mouthColorPicker.value;
+            ghostHatColor = hatColorPicker.value;
             ghostTrailColor = trailColorPicker.value;
             
             miniGhostBody.style.backgroundColor = ghostBodyColor;
             
+            if(ghostEyeStyle === 'hacker') {
+                miniGhostEyesCanvas.classList.add('hacker-anim');
+            } else {
+                miniGhostEyesCanvas.classList.remove('hacker-anim');
+            }
+
             if(ghostBodyStyle === 'bobble') { 
                 miniGhostBody.style.borderRadius = "50%"; miniGhostBody.style.clipPath = "none"; 
                 miniGhostBody.style.transform = "none";
@@ -593,12 +712,9 @@
         function toggleModal(show) {
             playSound(show ? 'nav_click' : 'sys_click');
             customModal.style.display = show ? 'flex' : 'none';
-            if (show) { isPaused = true; }
+            if (show) { isPaused = true; switchGhostSlot(currentSlot); }
             else { 
-                localStorage.setItem('ghostBody', bodyColorPicker.value);
-                localStorage.setItem('ghostEye', eyeColorPicker.value);
-                localStorage.setItem('ghostMouth', mouthColorPicker.value);
-                localStorage.setItem('ghostTrail', trailColorPicker.value);
+                saveGhostSlot(currentSlot);
                 updateGhostUI(); isPaused = false;
             }
         }
@@ -612,7 +728,6 @@
         function selectEyeStyle(style) {
             playSound('sys_click');
             ghostEyeStyle = style;
-            localStorage.setItem('ghostEyeStyle', style);
             highlightActiveOptions('eye-opt', style);
             updateGhostUI();
         }
@@ -626,7 +741,6 @@
         function selectMouthStyle(style) {
             playSound('sys_click');
             ghostMouthStyle = style;
-            localStorage.setItem('ghostMouthStyle', style);
             highlightActiveOptions('mouth-opt', style);
             updateGhostUI();
         }
@@ -640,8 +754,33 @@
         function selectBodyStyle(style) {
             playSound('sys_click');
             ghostBodyStyle = style;
-            localStorage.setItem('ghostBodyStyle', style);
             highlightActiveOptions('body-opt', style);
+            updateGhostUI();
+        }
+
+        function toggleHatModal(show) {
+            playSound(show ? 'nav_click' : 'sys_click');
+            hatModal.style.display = show ? 'flex' : 'none';
+            if(show) highlightActiveOptions('hat-opt', ghostHatStyle);
+        }
+
+        function selectHatStyle(style) {
+            playSound('sys_click');
+            ghostHatStyle = style;
+            highlightActiveOptions('hat-opt', style);
+            updateGhostUI();
+        }
+
+        function toggleTrailModal(show) {
+            playSound(show ? 'nav_click' : 'sys_click');
+            trailModal.style.display = show ? 'flex' : 'none';
+            if(show) highlightActiveOptions('trail-opt', ghostTrailStyle);
+        }
+
+        function selectTrailStyle(style) {
+            playSound('sys_click');
+            ghostTrailStyle = style;
+            highlightActiveOptions('trail-opt', style);
             updateGhostUI();
         }
 
@@ -693,10 +832,9 @@
         async function shareScore() {
             playSound('action_click');
             const finalScore = Math.floor(score);
-            // Updated Share Message Branding
-            const message = `FLAPPY GHOST | V- 1.6\nMy score: ${finalScore}\n\nPlay here: ${window.location.href}`;
+            const message = `Antroverce | V- 0.1(Beta)\nMy score: ${finalScore}\n\nPlay here: ${window.location.href}`;
             if (navigator.share) {
-                try { await navigator.share({ title: 'FLAPPY GHOST', text: message }); return; } catch (err) {}
+                try { await navigator.share({ title: 'Antroverce', text: message }); return; } catch (err) {}
             }
             copyToClipboard(message);
         }
@@ -710,18 +848,17 @@
             setTimeout(() => toast.style.display = 'none', 2000);
         }
 
-        let ghost, pipes, frame, score, hackerMode, gameRunning, gameSpeed, spawnTimer;
+        let ghost, pipes, frame, score, gameRunning, gameSpeed, spawnTimer;
         let previewFrame = 0;
         let previewTrail = [];
 
         function initGameState() {
             ghost = { x: 50, y: 300, w: 45, h: 55, velocity: 0, gravity: 0.25, jump: -5.8, isDead: false, trail: [], particles: [] };
-            pipes = []; frame = 0; score = 0; hackerMode = false; gameRunning = false; gameSpeed = 3.2; spawnTimer = 0; isPaused = false;
+            pipes = []; frame = 0; score = 0; gameRunning = false; gameSpeed = 3.2; spawnTimer = 0; isPaused = false;
             scoreEl.innerText = "0";
             let storedHigh = localStorage.getItem('ghostChatHighScore') || 0;
             highScoreDisplay.innerText = `BEST: ${storedHigh}`;
             overlay.style.display = 'flex'; deathScreen.style.display = 'none';
-            wrapper.classList.remove('hacker-zoom-active'); scoreContainer.classList.remove('glitch-text');
             updateGhostUI();
         }
 
@@ -731,28 +868,87 @@
             if(e && e.cancelable) e.preventDefault();
         };
 
-        window.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') flap();
-            if (e.key === 'Shift') toggleHackerMode(true);
-        });
-        window.addEventListener('keyup', (e) => { if (e.key === 'Shift') toggleHackerMode(false); });
+        window.addEventListener('keydown', (e) => { if (e.code === 'Space') flap(); });
         canvas.addEventListener('touchstart', flap, {passive: false});
         canvas.addEventListener('mousedown', flap);
-
-        function toggleHackerMode(active) {
-            if(!gameRunning || ghost.isDead || isPaused) return;
-            hackerMode = active;
-            if (active) { wrapper.classList.add('hacker-zoom-active'); scoreContainer.classList.add('glitch-text'); } 
-            else { wrapper.classList.remove('hacker-zoom-active'); scoreContainer.classList.remove('glitch-text'); }
-        }
 
         function drawBody(c, color, style) {
             c.fillStyle = color; c.strokeStyle = "#2b2b2b"; c.lineWidth = 3; c.beginPath();
             if (style === 'bobble') { c.arc(0, 0, 24, 0, Math.PI * 2); }
             else if (style === 'spiky') { 
-                c.moveTo(0, -30); c.lineTo(25, -10); c.lineTo(18, 25); c.lineTo(-18, 25); c.lineTo(-25, -10);
+                for(let i=0; i<8; i++) {
+                    let angle = (i/8) * Math.PI * 2;
+                    let r = i%2===0 ? 25 : 15;
+                    c.lineTo(Math.cos(angle)*r, Math.sin(angle)*r);
+                }
             }
-            else if (style === 'slim') { c.roundRect(-15, -30, 30, 60, 10); }
+            else if (style === 'slim') { c.roundRect(-12, -30, 24, 60, 8); }
+            else if (style === 'heavy') { c.roundRect(-25, -20, 50, 50, 5); }
+            else if (style === 'diamond') {
+                c.moveTo(0,-30); c.lineTo(25,0); c.lineTo(0,30); c.lineTo(-25,0);
+            }
+            else if (style === 'star') {
+                for(let i=0; i<10; i++) {
+                    let r = i%2===0 ? 28 : 12;
+                    let angle = (i/10) * Math.PI * 2 - Math.PI/2;
+                    c.lineTo(Math.cos(angle)*r, Math.sin(angle)*r);
+                }
+            }
+            else if (style === 'heart') {
+                c.moveTo(0, 10);
+                c.bezierCurveTo(-25, -20, -25, -40, 0, -25);
+                c.bezierCurveTo(25, -40, 25, -20, 0, 10);
+            }
+            else if (style === 'cloud') {
+                c.arc(-15, 0, 12, 0, Math.PI*2); c.arc(0, -10, 15, 0, Math.PI*2); c.arc(15, 0, 12, 0, Math.PI*2); c.arc(0, 10, 12, 0, Math.PI*2);
+            }
+            else if (style === 'pixel') {
+                c.rect(-20,-20,10,10); c.rect(-10,-30,20,10); c.rect(10,-20,10,10);
+                c.rect(-20,-10,40,20); c.rect(-10,10,20,10);
+            }
+            else if (style === 'ghostly') {
+                c.moveTo(-20,-20); c.bezierCurveTo(-20,-40, 20,-40, 20,-20);
+                c.lineTo(20, 20);
+                for(let i=0; i<3; i++) { c.quadraticCurveTo(20-i*13.3-6.6, 35, 20-(i+1)*13.3, 20); }
+                c.lineTo(-20, 20);
+            }
+            else if (style === 'liquid') {
+                c.moveTo(-20, -20); c.bezierCurveTo(-10, -35, 10, -35, 20, -20);
+                c.bezierCurveTo(30, 0, 15, 15, 0, 30); c.bezierCurveTo(-15, 15, -30, 0, -20, -20);
+            }
+            else if (style === 'glitchy') {
+                c.rect(-20, -20, 40, 40); c.rect(-25, -5, 50, 5); c.rect(-5, -25, 5, 50);
+            }
+            else if (style === 'fire') {
+                c.moveTo(0, 30); c.quadraticCurveTo(-25, 10, -10, -20); c.quadraticCurveTo(0, -40, 10, -20); c.quadraticCurveTo(25, 10, 0, 30);
+            }
+            else if (style === 'ice') {
+                c.moveTo(0, -30); c.lineTo(20, 0); c.lineTo(10, 0); c.lineTo(20, 30); c.lineTo(-20, 30); c.lineTo(-10, 0); c.lineTo(-20, 0);
+            }
+            else if (style === 'wood') {
+                c.roundRect(-20, -30, 40, 60, 5); c.moveTo(-10, -20); c.lineTo(-10, 20); c.moveTo(10, -15); c.lineTo(10, 15);
+            }
+            else if (style === 'stone') {
+                c.moveTo(-15, -25); c.lineTo(15, -25); c.lineTo(22, 0); c.lineTo(15, 25); c.lineTo(-15, 25); c.lineTo(-22, 0);
+            }
+            else if (style === 'leaf') {
+                c.moveTo(0, -30); c.quadraticCurveTo(25, -10, 0, 30); c.quadraticCurveTo(-25, -10, 0, -30);
+            }
+            else if (style === 'metal') {
+                c.roundRect(-22, -25, 44, 50, 15); c.rect(-18, -10, 36, 5);
+            }
+            else if (style === 'paper') {
+                c.moveTo(-20, -30); c.lineTo(15, -30); c.lineTo(20, -25); c.lineTo(20, 30); c.lineTo(-20, 30);
+            }
+            else if (style === 'ribbon') {
+                c.moveTo(-15, -30); c.lineTo(15, -30); c.lineTo(15, 30); c.lineTo(0, 15); c.lineTo(-15, 30);
+            }
+            else if (style === 'snake') {
+                c.moveTo(-10, -30); c.quadraticCurveTo(20, -15, -10, 0); c.quadraticCurveTo(-30, 15, 10, 30);
+            }
+            else if (style === 'blob') {
+                for(let i=0; i<6; i++) { let a = (i/6)*Math.PI*2; let r = 20 + Math.sin(a*3)*5; c.lineTo(Math.cos(a)*r, Math.sin(a)*r); }
+            }
             else { 
                 c.moveTo(-20, -10); c.bezierCurveTo(-20, -35, 20, -35, 20, -10); 
                 c.lineTo(20, 20); c.quadraticCurveTo(10, 30, 0, 20); c.quadraticCurveTo(-10, 30, -20, 20); 
@@ -762,16 +958,69 @@
 
         function drawFacialFeatures(context, eColor, mColor, eStyle, mStyle) {
             context.fillStyle = eColor; context.strokeStyle = eColor; context.lineWidth = 2;
+            
+            const zoom = (eStyle === 'hacker') ? (1 + Math.sin(Date.now() * 0.01) * 0.1) : 1;
+            context.save();
+            context.scale(zoom, zoom);
+
             if (eStyle === 'classic') {
                 context.beginPath(); context.ellipse(-7, -8, 3.5, 6, 0, 0, Math.PI * 2); context.ellipse(7, -8, 3.5, 6, 0, 0, Math.PI * 2); context.fill();
             } else if (eStyle === 'blink') {
                 context.beginPath(); context.fillRect(-10, -8, 7, 2); context.fillRect(3, -8, 7, 2); context.fill();
             } else if (eStyle === 'hacker') {
-                context.font = "bold 12px Courier"; context.fillText("<>", -12, -4);
+                context.font = "bold 14px Courier"; context.fillText("X X", -12, -4);
             } else if (eStyle === 'angry') {
                 context.beginPath(); context.moveTo(-11, -12); context.lineTo(-4, -8); context.lineTo(-11, -4); context.moveTo(11, -12); context.lineTo(4, -8); context.lineTo(11, -4); context.stroke();
+            } else if (eStyle === 'surprised') {
+                context.beginPath(); context.arc(-7, -8, 4, 0, Math.PI*2); context.arc(7, -8, 4, 0, Math.PI*2); context.stroke();
+            } else if (eStyle === 'tired') {
+                context.beginPath(); context.arc(-7, -8, 4, Math.PI, 0); context.arc(7, -8, 4, Math.PI, 0); context.stroke();
+            } else if (eStyle === 'closed') {
+                context.beginPath(); context.arc(-7, -8, 5, 0, Math.PI); context.arc(7, -8, 5, 0, Math.PI); context.stroke();
+            } else if (eStyle === 'monocle') {
+                context.beginPath(); context.arc(-7, -8, 3, 0, Math.PI*2); context.fill();
+                context.beginPath(); context.arc(7, -8, 6, 0, Math.PI*2); context.stroke();
+            } else if (eStyle === 'pirate') {
+                context.fillRect(-11, -10, 8, 4); context.beginPath(); context.moveTo(-15, -8); context.lineTo(15, -8); context.stroke();
+                context.beginPath(); context.arc(7, -8, 3.5, 0, Math.PI*2); context.fill();
+            } else if (eStyle === 'sparkle') {
+                context.font = "14px serif"; context.fillText("✧", -14, -4); context.fillText("✧", 2, -4);
+            } else if (eStyle === 'crying') {
+                context.fillStyle = "cyan"; context.beginPath(); context.arc(-7, -8, 4, 0, Math.PI*2); context.arc(7, -8, 4, 0, Math.PI*2); context.fill();
+                context.fillRect(-8, -4, 2, 8); context.fillRect(6, -4, 2, 8);
+            } else if (eStyle === 'spiral') {
+                context.beginPath(); for(let i=0; i<10; i++){ let r=i*0.6; context.lineTo(-7+Math.cos(i)*r, -8+Math.sin(i)*r); } context.stroke();
+                context.beginPath(); for(let i=0; i<10; i++){ let r=i*0.6; context.lineTo(7+Math.cos(i)*r, -8+Math.sin(i)*r); } context.stroke();
+            } else if (eStyle === 'laser') {
+                context.fillStyle = "red"; context.beginPath(); context.arc(-7, -8, 4, 0, Math.PI*2); context.arc(7, -8, 4, 0, Math.PI*2); context.fill();
+            } else if (eStyle === 'star') {
+                context.font = "14px serif"; context.fillText("★", -14, -4); context.fillText("★", 2, -4);
+            } else if (eStyle === 'cyclops') {
+                context.beginPath(); context.arc(0, -8, 8, 0, Math.PI*2); context.fill();
+            } else if (eStyle === 'creepy') {
+                context.beginPath(); context.arc(-7, -8, 2, 0, Math.PI*2); context.arc(7, -8, 2, 0, Math.PI*2); context.fill();
+            } else if (eStyle === 'shades') {
+                context.fillStyle = "#000"; context.fillRect(-15, -12, 12, 8); context.fillRect(3, -12, 12, 8); context.fillRect(-3, -10, 6, 2);
+            } else if (eStyle === 'nerd') {
+                context.strokeRect(-13, -13, 10, 10); context.strokeRect(3, -13, 10, 10); context.fillRect(-3, -8, 6, 2);
+            } else if (eStyle === 'glitch') {
+                context.fillRect(-12, -10, 8, 2); context.fillRect(4, -6, 8, 2);
+            } else if (eStyle === 'cute') {
+                context.beginPath(); context.arc(-7, -8, 4, 0, Math.PI*2); context.arc(7, -8, 4, 0, Math.PI*2); context.fill();
+                context.fillStyle = "white"; context.beginPath(); context.arc(-8, -10, 1.5, 0, Math.PI*2); context.arc(6, -10, 1.5, 0, Math.PI*2); context.fill();
+            } else if (eStyle === 'void') {
+                context.beginPath(); context.arc(-7, -8, 6, 0, Math.PI*2); context.arc(7, -8, 6, 0, Math.PI*2); context.stroke();
+            } else if (eStyle === 'flame') {
+                context.fillStyle = "orange"; context.beginPath(); context.moveTo(-7, -15); context.lineTo(-12, -5); context.lineTo(-2, -5); context.fill();
+                context.beginPath(); context.moveTo(7, -15); context.lineTo(2, -5); context.lineTo(12, -5); context.fill();
+            } else if (eStyle === 'ghostly') {
+                context.globalAlpha = 0.5; context.beginPath(); context.arc(-7, -8, 5, 0, Math.PI*2); context.arc(7, -8, 5, 0, Math.PI*2); context.fill(); context.globalAlpha = 1;
+            } else {
+                context.beginPath(); context.arc(-7, -8, 4, 0, Math.PI * 2); context.arc(7, -8, 4, 0, Math.PI * 2); context.fill();
             }
-            context.strokeStyle = mColor; context.fillStyle = mColor;
+            
+            context.restore();
+            context.strokeStyle = mColor; context.fillStyle = mColor; context.lineWidth = 2;
             if (mStyle === 'smile') {
                 context.beginPath(); context.arc(0, 2, 6, 0, Math.PI); context.stroke();
             } else if (mStyle === 'ooh') {
@@ -782,44 +1031,151 @@
                 context.beginPath(); context.moveTo(4, 4); context.lineTo(3, 8); context.lineTo(2, 4); context.fill();
             } else if (mStyle === 'flat') {
                 context.beginPath(); context.moveTo(-5, 6); context.lineTo(5, 6); context.stroke();
+            } else if (mStyle === 'grin') {
+                context.strokeRect(-8, 4, 16, 6); context.beginPath(); context.moveTo(-8, 7); context.lineTo(8, 7); context.stroke();
+            } else if (mStyle === 'frown') {
+                context.beginPath(); context.arc(0, 12, 6, Math.PI, 0); context.stroke();
+            } else if (mStyle === 'tongue') {
+                context.beginPath(); context.moveTo(-5, 4); context.lineTo(5, 4); context.stroke();
+                context.fillStyle = "red"; context.roundRect(-3, 4, 6, 8, 3); context.fill();
+            } else if (mStyle === 'whistle') {
+                context.beginPath(); context.arc(3, 6, 2, 0, Math.PI*2); context.stroke();
+            } else if (mStyle === 'beard') {
+                context.beginPath(); context.moveTo(-10, 5); context.lineTo(0, 15); context.lineTo(10, 5); context.fill();
+            } else if (mStyle === 'bucktooth') {
+                context.strokeRect(-4, 4, 8, 4); context.beginPath(); context.moveTo(0, 4); context.lineTo(0, 8); context.stroke();
+            } else if (mStyle === 'stitched') {
+                context.beginPath(); context.moveTo(-8, 6); context.lineTo(8, 6); context.stroke();
+                for(let i=0; i<4; i++) { context.moveTo(-6+i*4, 3); context.lineTo(-6+i*4, 9); } context.stroke();
+            } else if (mStyle === 'drool') {
+                context.beginPath(); context.moveTo(-5, 6); context.lineTo(5, 6); context.stroke();
+                context.fillStyle = "cyan"; context.fillRect(2, 6, 3, 8);
+            } else if (mStyle === 'zipper') {
+                context.beginPath(); context.moveTo(-8, 6); context.lineTo(8, 6); context.stroke();
+                for(let i=0; i<6; i++) { context.fillRect(-8+i*3, 4, 1, 4); }
+            } else if (mStyle === 'moustache') {
+                context.beginPath(); context.moveTo(-10, 8); context.quadraticCurveTo(-5, 4, 0, 8); context.quadraticCurveTo(5, 4, 10, 8); context.stroke();
+            } else if (mStyle === 'cat') {
+                context.beginPath(); context.moveTo(-5, 6); context.quadraticCurveTo(-2.5, 10, 0, 6); context.quadraticCurveTo(2.5, 10, 5, 6); context.stroke();
+            } else if (mStyle === 'mask') {
+                context.fillStyle = "white"; context.roundRect(-12, 2, 24, 12, 3); context.fill(); context.stroke();
+            } else if (mStyle === 'teeth') {
+                context.fillRect(-8, 4, 16, 2); context.fillRect(-8, 8, 16, 2);
+            } else if (mStyle === 'bigsmile') {
+                context.beginPath(); context.arc(0, 2, 10, 0, Math.PI); context.fill();
+            } else if (mStyle === 'tiny') {
+                context.beginPath(); context.arc(0, 6, 1, 0, Math.PI*2); context.fill();
+            } else if (mStyle === 'wave') {
+                context.beginPath(); context.moveTo(-8, 6); context.quadraticCurveTo(-4, 2, 0, 6); context.quadraticCurveTo(4, 10, 8, 6); context.stroke();
+            } else if (mStyle === 'goldtooth') {
+                context.strokeRect(-6, 4, 12, 6); context.fillStyle = "gold"; context.fillRect(-2, 4, 4, 6);
+            } else if (mStyle === 'scared') {
+                context.beginPath(); context.ellipse(0, 8, 4, 8, 0, 0, Math.PI*2); context.stroke();
             }
         }
 
-        // Live Preview with floating movement
+        function drawHat(context, style, color) {
+            context.fillStyle = color; context.strokeStyle = "#2b2b2b"; context.lineWidth = 2;
+            if (style === 'crown') {
+                context.beginPath(); context.moveTo(-15, -30); context.lineTo(-15, -45); context.lineTo(-7, -35); context.lineTo(0, -50); context.lineTo(7, -35); context.lineTo(15, -45); context.lineTo(15, -30); context.closePath(); context.fill(); context.stroke();
+            } else if (style === 'halo') {
+                context.beginPath(); context.ellipse(0, -45, 18, 5, 0, 0, Math.PI * 2); context.stroke();
+            } else if (style === 'ninja') {
+                context.fillStyle = "#2b2b2b"; context.fillRect(-22, -25, 44, 10); context.fillStyle = color; context.beginPath(); context.arc(0, -20, 3, 0, Math.PI*2); context.fill();
+            } else if (style === 'horns') {
+                context.beginPath(); context.moveTo(-12, -30); context.quadraticCurveTo(-20, -50, -25, -40); context.stroke();
+                context.beginPath(); context.moveTo(12, -30); context.quadraticCurveTo(20, -50, 25, -40); context.stroke();
+            } else if (style === 'tophat') {
+                context.fillRect(-18, -32, 36, 4); context.fillRect(-12, -55, 24, 24);
+            } else if (style === 'beanie') {
+                context.beginPath(); context.arc(0, -25, 18, Math.PI, 0); context.fill(); context.stroke();
+            } else if (style === 'beret') {
+                context.beginPath(); context.ellipse(5, -32, 18, 8, 0.2, 0, Math.PI*2); context.fill(); context.stroke();
+            } else if (style === 'viking') {
+                context.beginPath(); context.arc(0, -25, 18, Math.PI, 0); context.fill(); context.stroke();
+                context.beginPath(); context.moveTo(-15, -30); context.lineTo(-25, -50); context.stroke();
+                context.beginPath(); context.moveTo(15, -30); context.lineTo(25, -50); context.stroke();
+            } else if (style === 'chef') {
+                context.beginPath(); context.arc(0, -45, 15, 0, Math.PI*2); context.fill(); context.fillRect(-12, -35, 24, 10);
+            } else if (style === 'wizard') {
+                context.beginPath(); context.moveTo(-20, -30); context.lineTo(0, -65); context.lineTo(20, -30); context.closePath(); context.fill(); context.stroke();
+            } else if (style === 'cowboy') {
+                context.beginPath(); context.ellipse(0, -32, 25, 6, 0, 0, Math.PI*2); context.fill(); context.stroke();
+                context.fillRect(-12, -45, 24, 15);
+            } else if (style === 'party') {
+                context.beginPath(); context.moveTo(-12, -30); context.lineTo(0, -55); context.lineTo(12, -30); context.closePath(); context.fill(); context.stroke();
+                context.beginPath(); context.arc(0, -57, 4, 0, Math.PI*2); context.fill();
+            } else if (style === 'tiara') {
+                context.beginPath(); context.arc(0, -30, 15, Math.PI, 0); context.stroke(); context.fillText("✧", -4, -35);
+            } else if (style === 'antenna') {
+                context.beginPath(); context.moveTo(0, -30); context.lineTo(0, -55); context.stroke();
+                context.beginPath(); context.arc(0, -58, 3, 0, Math.PI*2); context.fill();
+            } else if (style === 'flower') {
+                context.fillStyle = "pink"; for(let i=0; i<5; i++){ let a=(i/5)*Math.PI*2; context.beginPath(); context.arc(Math.cos(a)*8, -40+Math.sin(a)*8, 5, 0, Math.PI*2); context.fill(); }
+            } else if (style === 'earmuffs') {
+                context.beginPath(); context.arc(0, -30, 20, Math.PI, 0); context.stroke();
+                context.beginPath(); context.arc(-20, -10, 6, 0, Math.PI*2); context.arc(20, -10, 6, 0, Math.PI*2); context.fill();
+            } else if (style === 'goggles') {
+                context.strokeRect(-15, -15, 12, 10); context.strokeRect(3, -15, 12, 10);
+            } else if (style === 'arrow') {
+                context.beginPath(); context.moveTo(-25, -40); context.lineTo(25, -40); context.lineTo(15, -50); context.stroke();
+            } else if (style === 'propeller') {
+                context.fillRect(-2, -45, 4, 15); context.fillRect(-15, -45, 30, 2);
+            } else if (style === 'cat-ears') {
+                context.beginPath(); context.moveTo(-18, -30); context.lineTo(-12, -45); context.lineTo(-6, -30); context.fill(); context.stroke();
+                context.beginPath(); context.moveTo(18, -30); context.lineTo(12, -45); context.lineTo(6, -30); context.fill(); context.stroke();
+            } else if (style === 'bunny-ears') {
+                context.roundRect(-15, -55, 8, 25, 5); context.roundRect(7, -55, 8, 25, 5); context.fill(); context.stroke();
+            } else if (style === 'shogun') {
+                context.fillRect(-20, -35, 40, 5); context.beginPath(); context.moveTo(-10, -35); context.lineTo(0, -55); context.lineTo(10, -35); context.fill();
+            }
+        }
+
+        function drawTrailModel(c, x, y, a, style, color) {
+            c.save(); c.translate(x + ghost.w/2, y + ghost.h/2);
+            c.globalAlpha = a; c.fillStyle = color;
+            if (style === 'ghostly') { drawBody(c, color, 'ghostly'); }
+            else if (style === 'fire') {
+                c.beginPath(); c.moveTo(0, 10); c.lineTo(-10, -10); c.lineTo(0, -30); c.lineTo(10, -10); c.closePath(); c.fill();
+            } else if (style === 'pixel') {
+                c.fillRect(-10, -10, 20, 20);
+            } else if (style === 'star') {
+                c.beginPath(); for(let i=0; i<10; i++) { let r=i%2===0?15:7; let ang=(i/10)*Math.PI*2; c.lineTo(Math.cos(ang)*r, Math.sin(ang)*r); } c.fill();
+            } else if (style === 'heart') {
+                c.beginPath(); c.moveTo(0, 10); c.bezierCurveTo(-15,-10,-15,-25,0,-15); c.bezierCurveTo(15,-25,15,-10,0,10); c.fill();
+            } else if (style === 'cloud') {
+                c.beginPath(); c.arc(-8,0,8,0,Math.PI*2); c.arc(0,-6,10,0,Math.PI*2); c.arc(8,0,8,0,Math.PI*2); c.fill();
+            } else if (style === 'smoke') {
+                c.beginPath(); c.arc(0,0,Math.random()*15 + 5,0,Math.PI*2); c.fill();
+            } else { drawBody(c, color, ghostBodyStyle); }
+            c.restore();
+        }
+
         function updatePreview() {
             if (customModal.style.display !== 'flex') return;
             previewFrame++;
             const floatY = Math.sin(previewFrame * 0.08) * 20;
-            
             pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
-            
-            // Generate preview trail
             if (previewFrame % 4 === 0) previewTrail.push({ y: floatY, a: 0.4, x: pCanvas.width/2 });
-            
             previewTrail.forEach((t, i) => {
-                pCtx.save();
-                pCtx.globalAlpha = t.a;
-                pCtx.translate(t.x, pCanvas.height/2 + t.y);
-                drawBody(pCtx, ghostTrailColor, ghostBodyStyle);
-                pCtx.restore();
-                t.x -= 1.5; // Move trail left in preview
-                t.a -= 0.015;
-                if (t.a <= 0 || t.x < -50) previewTrail.splice(i, 1);
+                drawTrailModel(pCtx, t.x - 25, pCanvas.height/2 + t.y - 30, t.a, ghostTrailStyle, ghostTrailColor);
+                t.x -= 1.5; t.a -= 0.015; if (t.a <= 0 || t.x < -50) previewTrail.splice(i, 1);
             });
-
-            pCtx.save(); 
-            pCtx.translate(pCanvas.width/2, pCanvas.height/2 + floatY);
+            pCtx.save(); pCtx.translate(pCanvas.width/2, pCanvas.height/2 + floatY);
             drawBody(pCtx, bodyColorPicker.value, ghostBodyStyle);
             drawFacialFeatures(pCtx, eyeColorPicker.value, mouthColorPicker.value, ghostEyeStyle, ghostMouthStyle);
+            drawHat(pCtx, ghostHatStyle, hatColorPicker.value);
             pCtx.restore();
         }
 
         function renderGhostModel(x, y, isTrail) {
             ctx.save(); ctx.translate(x + ghost.w/2, y + ghost.h/2);
             if(!isTrail) ctx.rotate(Math.min(0.4, Math.max(-0.4, ghost.velocity * 0.1)));
-            if(hackerMode && !isTrail) { ctx.shadowBlur = 15; ctx.shadowColor = varColor('--gold'); }
             drawBody(ctx, isTrail ? ghostTrailColor : ghostBodyColor, ghostBodyStyle);
-            if(!isTrail) drawFacialFeatures(ctx, hackerMode ? varColor('--gold') : ghostEyeColor, hackerMode ? varColor('--gold') : ghostMouthColor, ghostEyeStyle, ghostMouthStyle);
+            if(!isTrail) {
+                drawFacialFeatures(ctx, ghostEyeColor, ghostMouthColor, ghostEyeStyle, ghostMouthStyle);
+                drawHat(ctx, ghostHatStyle, ghostHatColor);
+            }
             ctx.restore();
         }
 
@@ -833,10 +1189,19 @@
             if (finalScore > currentHigh) { currentHigh = finalScore; localStorage.setItem('ghostChatHighScore', currentHigh); }
             document.getElementById('finalScore').innerText = finalScore;
             document.getElementById('bestScore').innerText = currentHigh;
-            for(let i=0; i<20; i++) {
-                ghost.particles.push({ x: ghost.x + 20, y: ghost.y + 20, vx: (Math.random()-0.5)*12, vy: (Math.random()-0.5)*12, a: 1, s: Math.random()*5 });
+            
+            ghost.particles = [];
+            for(let i=0; i<25; i++) {
+                ghost.particles.push({ 
+                    x: ghost.x + ghost.w/2, 
+                    y: ghost.y + ghost.h/2, 
+                    vx: (Math.random()-0.5)*15, 
+                    vy: (Math.random()-0.5)*15, 
+                    a: 1, 
+                    s: Math.random()*8 + 2 
+                });
             }
-            setTimeout(() => { deathScreen.style.display = 'flex'; wrapper.classList.remove('hacker-zoom-active'); }, 1000);
+            setTimeout(() => { deathScreen.style.display = 'flex'; }, 800);
         }
 
         function update() {
@@ -852,8 +1217,7 @@
                 spawnTimer = currentSpawnGap;
             }
             pipes.forEach(p => {
-                let moveStep = hackerMode ? dynamicSpeed * 1.6 : dynamicSpeed;
-                p.x -= moveStep;
+                p.x -= dynamicSpeed;
                 if (ghost.x + 12 < p.x + p.w && ghost.x + ghost.w - 12 > p.x && ghost.y + 12 < p.y + p.h && ghost.y + ghost.h - 12 > p.y) triggerDeath();
                 if (!p.passed && p.x < ghost.x) { score += 0.5; p.passed = true; if (Number.isInteger(score)) { scoreEl.innerText = score; playSound('score'); } }
             });
@@ -865,22 +1229,31 @@
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             pipes.forEach(p => {
-                ctx.fillStyle = hackerMode ? "rgba(212, 175, 55, 0.1)" : "rgba(43, 43, 43, 0.05)";
-                ctx.fillRect(p.x, p.y, p.w, p.h); ctx.strokeStyle = hackerMode ? varColor('--gold') : varColor('--ink');
+                ctx.fillStyle = "rgba(43, 43, 43, 0.05)";
+                ctx.fillRect(p.x, p.y, p.w, p.h); ctx.strokeStyle = varColor('--ink');
                 ctx.lineWidth = 3; ctx.strokeRect(p.x, p.y, p.w, p.h); ctx.fillStyle = ctx.strokeStyle;
                 if(p.y === 0) ctx.fillRect(p.x - 5, p.h - 10, p.w + 10, 10); else ctx.fillRect(p.x - 5, p.y, p.w + 10, 10);
             });
             if (ghost.isDead) {
-                ghost.particles.forEach(p => { ctx.fillStyle = `rgba(43, 43, 43, ${p.a})`; ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2); ctx.fill(); p.x += p.vx; p.y += p.vy; p.a -= 0.015; });
+                ghost.particles.forEach(p => { 
+                    ctx.fillStyle = `rgba(43, 43, 43, ${p.a})`; 
+                    ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2); ctx.fill(); 
+                    p.x += p.vx; p.y += p.vy; p.a -= 0.02; 
+                });
             } else {
-                if (!isPaused && frame % 3 === 0) ghost.trail.push({x: ghost.x, y: ghost.y, a: 0.4});
-                ghost.trail.forEach((t, i) => { ctx.globalAlpha = t.a; renderGhostModel(t.x, t.y, true); t.a -= 0.05; if(t.a <= 0) ghost.trail.splice(i, 1); });
+                if (!isPaused && frame % 4 === 0) ghost.trail.push({x: ghost.x, y: ghost.y, a: 0.5});
+                ghost.trail.forEach((t, i) => { 
+                    drawTrailModel(ctx, t.x, t.y, t.a, ghostTrailStyle, ghostTrailColor);
+                    t.a -= 0.04; if(t.a <= 0) ghost.trail.splice(i, 1); 
+                });
                 ctx.globalAlpha = 1; renderGhostModel(ghost.x, ghost.y, false);
             }
         }
 
         function loop() { update(); draw(); updatePreview(); requestAnimationFrame(loop); }
-        initGameState(); loop();
+        initGameState(); 
+        initStyleGrids();
+        loop();
 
         /* PWA Setup */
         let deferredPrompt;
